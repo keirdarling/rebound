@@ -90,7 +90,7 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     // Keeps track of number of active particles.
     r->N_active = 0;
     r->N = 0;
-    for (int i=0; i<rim->globalN; i++){
+    for (unsigned int i=0; i<rim->globalN; i++){
         if(rim->encounterIndicies[i]>0){
             rim->encounterParticles[r->N] = rim->p_hold[i];
             rim->encounterParticles[r->N].r = r->particles[i].r;
@@ -98,7 +98,7 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
             rim->encounterParticles[r->N].hash = r->particles[i].hash;
             rim->encounterRhill[r->N] = rim->rhill[i];
             r->N++;
-            if (i<rim->globalNactive){
+            if ((int)i<rim->globalNactive){
                 // The case globalNactive==-1 is handled below
                 r->N_active++;
             }
@@ -139,7 +139,7 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     // If a collision occured, then encounterIndicies and
     // globalN will have changed.
     int k = 0;
-    for (int i=0; i<rim->globalN; i++){
+    for (unsigned int i=0; i<rim->globalN; i++){
         if(rim->encounterIndicies[i]>0){
             riw->p_jh[i] = r->particles[k];
             // In case properties changed in a collision
@@ -256,7 +256,7 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
     struct reb_particle* restrict const particles = r->particles;
     struct reb_simulation_integrator_mercurius* const rim = &(r->ri_mercurius);
     struct reb_simulation_integrator_whfast* const riw = &(r->ri_whfast);
-    const int N = r->N;
+    const unsigned int N = r->N;
    
     
     if (rim->rhillallocatedN<N){
@@ -298,7 +298,7 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
             reb_warning(r,"MERCURIUS: Recalculating rhill but pos/vel were not synchronized before.");
         }
         rim->rhill[0] = 0; // Unsused
-        for (int i=1;i<N;i++){
+        for (unsigned int i=1;i<N;i++){
             const double dx  = riw->p_jh[i].x;
             const double dy  = riw->p_jh[i].y;
             const double dz  = riw->p_jh[i].z;

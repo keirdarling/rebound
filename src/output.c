@@ -248,9 +248,9 @@ void reb_output_binary(struct reb_simulation* r, char* filename){
     WRITE_FIELD(G,                  &r->G,                              sizeof(double));
     WRITE_FIELD(SOFTENING,          &r->softening,                      sizeof(double));
     WRITE_FIELD(DT,                 &r->dt,                             sizeof(double));
-    WRITE_FIELD(N,                  &r->N,                              sizeof(int));
-    WRITE_FIELD(NVAR,               &r->N_var,                          sizeof(int));
-    WRITE_FIELD(VARCONFIGN,         &r->var_config_N,                   sizeof(int));
+    WRITE_FIELD(N,                  &r->N,                              sizeof(unsigned int));
+    WRITE_FIELD(NVAR,               &r->N_var,                          sizeof(unsigned int));
+    WRITE_FIELD(VARCONFIGN,         &r->var_config_N,                   sizeof(unsigned int));
     WRITE_FIELD(NACTIVE,            &r->N_active,                       sizeof(int));
     WRITE_FIELD(TESTPARTICLETYPE,   &r->testparticle_type,              sizeof(int));
     WRITE_FIELD(HASHCTR,            &r->hash_ctr,                       sizeof(int));

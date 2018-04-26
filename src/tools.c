@@ -114,7 +114,7 @@ void reb_move_to_com(struct reb_simulation* const r){
 	struct reb_particle* restrict const particles = r->particles;
 	struct reb_particle com = reb_get_com(r);
     // First do second order
-    for (int v=0;v<r->var_config_N;v++){
+    for (unsigned int v=0;v<r->var_config_N;v++){
         int index = r->var_config[v].index;
         if (r->var_config[v].testparticle>=0){
             // Test particles do not affect the COM
@@ -219,7 +219,7 @@ void reb_move_to_com(struct reb_simulation* const r){
         }
     }
     // Then do first order
-    for (int v=0;v<r->var_config_N;v++){
+    for (unsigned int v=0;v<r->var_config_N;v++){
         int index = r->var_config[v].index;
         if (r->var_config[v].testparticle>=0){
             // Test particles do not affect the COM

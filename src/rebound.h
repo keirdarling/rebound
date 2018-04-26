@@ -222,7 +222,7 @@ struct reb_simulation_integrator_mercurius {
     unsigned int mode;          ///< Internal. 0 if WH is operating, 1 if IAS15 is operating.
     unsigned int encounterN;    ///< Number of particles currently having an encounter
     unsigned int globalN;       
-    unsigned int globalNactive;
+    int globalNactive;
     unsigned int allocatedN;
     unsigned int rhillallocatedN;
     unsigned int encounterAllocatedN;
@@ -696,17 +696,17 @@ struct reb_simulation {
     double  softening;              ///< Gravitational softening parameter. Default: 0. 
     double  dt;                     ///< Current timestep. 
     double  dt_last_done;           ///< Last dt used by integrator
-    int     N;                      ///< Current number of particles on this node. 
-    int     N_var;                  ///< Total number of variational particles. Default: 0.
-    int     var_config_N;           ///< Number of variational configuration structs. Default: 0.
+    unsigned int N;                 ///< Current number of particles on this node. 
+    unsigned int N_var;             ///< Total number of variational particles. Default: 0.
+    unsigned int var_config_N;      ///< Number of variational configuration structs. Default: 0.
     struct reb_variational_configuration* var_config;   ///< These configuration structs contain details on variational particles. 
     int     N_active;               ///< Number of massive particles included in force calculation (default: N). Particles with index >= N_active are considered testparticles.
     int     testparticle_type;      ///< Type of the particles with an index>=N_active. 0 means particle does not influence any other particle (default), 1 means particles with index < N_active feel testparticles (similar to MERCURY's small particles). Testparticles never feel each other.
     struct reb_hash_pointer_pair* particle_lookup_table; ///< Array of pairs that map particles' hashes to their index in the particles array.
     int     hash_ctr;               ///< Counter for number of assigned hashes to assign unique values.
     int     N_lookup;               ///< Number of entries in the particle lookup table.
-    int     allocatedN_lookup;      ///< Number of lookup table entries allocated.
-    int     allocatedN;             ///< Current maximum space allocated in the particles array on this node. 
+    unsigned int allocatedN_lookup; ///< Number of lookup table entries allocated.
+    unsigned int allocatedN;        ///< Current maximum space allocated in the particles array on this node. 
     struct reb_particle* particles; ///< Main particle array. This contains all particles on this node.  
     struct reb_vec3d* gravity_cs;   ///< Vector containing the information for compensated gravity summation 
     int     gravity_cs_allocatedN;  ///< Current number of allocated space for cs array
@@ -1655,9 +1655,9 @@ long reb_simulationarchive_estimate_size(struct reb_simulation* const r, double 
  * @param N number of particles in the array.
  */
 
-void reb_transformations_inertial_to_jacobi_posvel(const struct reb_particle* const particles, struct reb_particle* const p_j, const struct reb_particle* const p_mass, const int N);
-void reb_transformations_inertial_to_jacobi_posvelacc(const struct reb_particle* const particles, struct reb_particle* const p_j, const struct reb_particle* const p_mass, const int N);
-void reb_transformations_inertial_to_jacobi_acc(const struct reb_particle* const particles, struct reb_particle* const p_j,const struct reb_particle* const p_mass, const int N);
+void reb_transformations_inertial_to_jacobi_posvel(const struct reb_particle* const particles, struct reb_particle* const p_j, const struct reb_particle* const p_mass, const unsigned int N);
+void reb_transformations_inertial_to_jacobi_posvelacc(const struct reb_particle* const particles, struct reb_particle* const p_j, const struct reb_particle* const p_mass, const unsigned int N);
+void reb_transformations_inertial_to_jacobi_acc(const struct reb_particle* const particles, struct reb_particle* const p_j,const struct reb_particle* const p_mass, const unsigned int N);
 /** @} */
 /**
  * \name From Jacobi to inertial coordinates
@@ -1670,9 +1670,9 @@ void reb_transformations_inertial_to_jacobi_acc(const struct reb_particle* const
  * particles in ps, p_mass should be the corresponding array of real particles.
  * @param N number of particles in the array.
  */
-void reb_transformations_jacobi_to_inertial_posvel(struct reb_particle* const particles, const struct reb_particle* const p_j, const struct reb_particle* const p_mass, const int N);
-void reb_transformations_jacobi_to_inertial_pos(struct reb_particle* const particles, const struct reb_particle* const p_j, const struct reb_particle* const p_mass, const int N);
-void reb_transformations_jacobi_to_inertial_acc(struct reb_particle* const particles, const struct reb_particle* const p_j, const struct reb_particle* const p_mass, const int N);
+void reb_transformations_jacobi_to_inertial_posvel(struct reb_particle* const particles, const struct reb_particle* const p_j, const struct reb_particle* const p_mass, const unsigned int N);
+void reb_transformations_jacobi_to_inertial_pos(struct reb_particle* const particles, const struct reb_particle* const p_j, const struct reb_particle* const p_mass, const unsigned int N);
+void reb_transformations_jacobi_to_inertial_acc(struct reb_particle* const particles, const struct reb_particle* const p_j, const struct reb_particle* const p_mass, const unsigned int N);
 /** @} */
 /**
  * \name From inertial to democratic heliocentric coordinates
@@ -1684,8 +1684,8 @@ void reb_transformations_jacobi_to_inertial_acc(struct reb_particle* const parti
  * @param N number of particles in the array.
  * @param N_active number of active particles in the array.
  */
-void reb_transformations_inertial_to_democraticheliocentric_posvel(const struct reb_particle* const particles, struct reb_particle* const p_h, const int N);
-void reb_transformations_inertial_to_democraticheliocentric_posvel_testparticles(const struct reb_particle* const particles, struct reb_particle* const p_h, const int N, const int N_active);
+void reb_transformations_inertial_to_democraticheliocentric_posvel(const struct reb_particle* const particles, struct reb_particle* const p_h, const unsigned int N);
+void reb_transformations_inertial_to_democraticheliocentric_posvel_testparticles(const struct reb_particle* const particles, struct reb_particle* const p_h, const unsigned int N, const unsigned int N_active);
 /** @} */
 /**
  * \name From democratic heliocentric to inertial coordinates
@@ -1697,10 +1697,10 @@ void reb_transformations_inertial_to_democraticheliocentric_posvel_testparticles
  * @param N number of particles in the array.
  * @param N_active number of active particles in the array.
  */
-void reb_transformations_democraticheliocentric_to_inertial_pos(struct reb_particle* const particles, const struct reb_particle* const p_h, const int N);
-void reb_transformations_democraticheliocentric_to_inertial_pos_testparticles(struct reb_particle* const particles, const struct reb_particle* const p_h, const int N, const int N_active);
-void reb_transformations_democraticheliocentric_to_inertial_posvel(struct reb_particle* const particles, const struct reb_particle* const p_h, const int N);
-void reb_transformations_democraticheliocentric_to_inertial_posvel_testparticles(struct reb_particle* const particles, const struct reb_particle* const p_h, const int N, const int N_active);
+void reb_transformations_democraticheliocentric_to_inertial_pos(struct reb_particle* const particles, const struct reb_particle* const p_h, const unsigned int N);
+void reb_transformations_democraticheliocentric_to_inertial_pos_testparticles(struct reb_particle* const particles, const struct reb_particle* const p_h, const unsigned int N, const unsigned int N_active);
+void reb_transformations_democraticheliocentric_to_inertial_posvel(struct reb_particle* const particles, const struct reb_particle* const p_h, const unsigned int N);
+void reb_transformations_democraticheliocentric_to_inertial_posvel_testparticles(struct reb_particle* const particles, const struct reb_particle* const p_h, const unsigned int N, const unsigned int N_active);
 /** @} */
 /**
  * \name From inertial to WHDS coordinates
@@ -1711,7 +1711,7 @@ void reb_transformations_democraticheliocentric_to_inertial_posvel_testparticles
  * @param p_h Particles array in which the WHDS quantities will be stored.
  * @param N number of particles in the array.
  */
-void reb_transformations_inertial_to_whds_posvel(const struct reb_particle* const particles, struct reb_particle* const p_h, const int N);
+void reb_transformations_inertial_to_whds_posvel(const struct reb_particle* const particles, struct reb_particle* const p_h, const unsigned int N);
 /** @} */
 /**
  * \name From WHDS to inertial coordinates
@@ -1722,8 +1722,8 @@ void reb_transformations_inertial_to_whds_posvel(const struct reb_particle* cons
  * @param p_h Particles array in which the WHDS quantities will be stored.
  * @param N number of particles in the array.
  */
-void reb_transformations_whds_to_inertial_pos(struct reb_particle* const particles, const struct reb_particle* const p_h, const int N);
-void reb_transformations_whds_to_inertial_posvel(struct reb_particle* const particles, const struct reb_particle* const p_h, const int N);
+void reb_transformations_whds_to_inertial_pos(struct reb_particle* const particles, const struct reb_particle* const p_h, const unsigned int N);
+void reb_transformations_whds_to_inertial_posvel(struct reb_particle* const particles, const struct reb_particle* const p_h, const unsigned int N);
 /** @} */
 /** @} */
 

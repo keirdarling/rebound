@@ -270,13 +270,13 @@ void reb_create_simulation_from_binary_with_messages(struct reb_simulation* r, c
                     *warnings |= REB_INPUT_BINARY_WARNING_PARTICLES;
                 }
                 fread(r->particles, field.size,1,inf);
-                for (int l=0;l<r->allocatedN;l++){
+                for (unsigned int l=0;l<r->allocatedN;l++){
                     r->particles[l].c = NULL;
                     r->particles[l].ap = NULL;
                     r->particles[l].sim = r;
                 }
                 if (r->gravity==REB_GRAVITY_TREE || r->collision==REB_COLLISION_TREE){
-                    for (int l=0;l<r->allocatedN;l++){
+                    for (unsigned int l=0;l<r->allocatedN;l++){
                         reb_tree_add_particle_to_tree(r, l);
                     }
                 }
@@ -304,7 +304,7 @@ void reb_create_simulation_from_binary_with_messages(struct reb_simulation* r, c
                 r->var_config = malloc(field.size);
                 fread(r->var_config, field.size,1,inf);
                 if (r->var_config_N>0){
-                    for (int l=0;l<r->var_config_N;l++){
+                    for (unsigned int l=0;l<r->var_config_N;l++){
                         r->var_config[l].sim = r;
                     }
                 }

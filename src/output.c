@@ -355,7 +355,7 @@ void reb_output_binary(struct reb_simulation* r, char* filename){
         field.size = sizeof(struct reb_particle)*r->N;
         fwrite(&field,sizeof(struct reb_binary_field),1,of);
         // output one particle at a time to sanitize pointers.
-        for (int l=0;l<r->N;l++){
+        for (unsigned int l=0;l<r->N;l++){
             struct reb_particle op = r->particles[l];
             op.c = NULL;
             op.ap = NULL;

@@ -7,6 +7,10 @@ include src/integrator_mercurius.c
 include src/integrator_janus.c
 include src/integrator.c
 include src/gravity.c
+include src/memstream.c
+include src/fmemopen.c
+include src/memstream.h
+include src/fmemopen.h
 include src/collision.c
 include src/boundary.c
 include src/binarydiff.c

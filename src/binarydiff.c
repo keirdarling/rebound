@@ -33,6 +33,7 @@
 #include "rebound.h"
 #include "tools.h"
 #include "binarydiff.h"
+#include "memstream.h"
 
 void reb_binary_diff(FILE* f1, FILE* f2, char** bufp, size_t* sizep){
     if (!f1 || !f2){

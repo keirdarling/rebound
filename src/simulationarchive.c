@@ -39,6 +39,8 @@
 #include "input.h"
 #include "output.h"
 #include "integrator_ias15.h"
+#include "fmemopen.h"
+#include "memstream.h"
 
 
 void reb_create_simulation_from_simulationarchive_with_messages(struct reb_simulation* r, struct reb_simulationarchive* sa, long snapshot, enum reb_input_binary_messages* warnings){

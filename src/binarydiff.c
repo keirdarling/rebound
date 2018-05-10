@@ -45,9 +45,9 @@ void reb_binary_diff(FILE* f1, FILE* f2, char** bufp, size_t* sizep){
     long f20 = ftell(f2);
 
     // Create buffer which is large enough (note that files could have different fields)
-    FILE* diff = open_memstream(bufp, sizep);//fmemopen(NULL,f1length+f2length,"w+b");
+    FILE* diff = open_memstream(bufp, sizep);
     if (diff==0){
-        printf("fmemopen failed\n");
+        printf("open_memstream failed\n");
         return;
     }
     

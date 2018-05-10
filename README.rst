@@ -82,3 +82,10 @@ If you have trouble installing or using REBOUND, please open an issue on github 
 Changelog
 ---------
 For a changelog of the most important changes in recent updates, see https://github.com/hannorein/rebound/blob/master/changelog.rst 
+
+
+License
+-------
+REBOUND is using GNU General Public License (GPL) v3 which is provided in the LICENSE file that comes with this package. If you have a usecase that requires a different license, please contact the developers. 
+
+Parts of this package make use of Jeff Verkoeyen's fmemopen replacement (https://github.com/NimbusKit/memorymapping) and Ian Piumarta's open_memstream replacement (http://piumarta.com/software/memstream/) for old Mac OSX versions. Please see these websites for the respective licenses.

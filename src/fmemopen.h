@@ -15,6 +15,12 @@
 // limitations under the License.
 //
 
+// See if we need to include replacements for old Mac OSX versions
+#ifdef __APPLE__
+#include <Availability.h>
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < 101300
+// code to run up through 10.12.4
+
 #ifndef FMEMOPEN_H_
 #define FMEMOPEN_H_
 
@@ -50,3 +56,6 @@ FILE *fmemopen(void *buf, size_t size, const char *mode);
 #endif
 
 #endif // #ifndef FMEMOPEN_H_
+
+#endif // __MAC_OS_X_VERSION_MIN_REQUIRED
+#endif // __APPLE__

@@ -60,6 +60,9 @@
 #include <assert.h>
 
 #define min(X, Y) (((X) < (Y)) ? (X) : (Y))
+#define STRING2(x) #x
+#define STRING(x) STRING2(x)
+#pragma message "Compiling for old MacOSX Version " STRING(__MAC_OS_X_VERSION_MIN_REQUIRED)
 
 struct memstream
 {

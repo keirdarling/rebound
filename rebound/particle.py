@@ -444,6 +444,8 @@ class Particle(Structure):
             raise ValueError("Primary has no mass.")
         if err.value == 2:
             raise ValueError("Particle and primary positions are the same.")
+        if err.value == 3:
+            raise ValueError("At least one orbital parameter is not finite. This might be due to a floating point over/underflow. Check the cartesian coordinates of the particle.")
 
         return o
     

@@ -583,6 +583,29 @@ static double acos2(double num, double denom, double disambiguator){
 	return val;
 }
 
+
+static inline int _reb_orbit_isfinite(struct reb_orbit o){
+    if (       isfinite(o.d)
+            && isfinite(o.v)
+            && isfinite(o.h)
+            && isfinite(o.P)
+            && isfinite(o.n)
+            && isfinite(o.a)
+            && isfinite(o.e)
+            && isfinite(o.inc)
+            && isfinite(o.Omega)
+            && isfinite(o.omega)
+            && isfinite(o.pomega)
+            && isfinite(o.f)
+            && isfinite(o.M)
+            && isfinite(o.l)
+            && isfinite(o.theta)){
+        return 1;
+    }else{
+        return 0;
+    }
+}
+
 struct reb_orbit reb_tools_particle_to_orbit_err(double G, struct reb_particle p, struct reb_particle primary, int* err){
 	struct reb_orbit o;
 	if (primary.m <= TINY){	
@@ -710,8 +733,10 @@ struct reb_orbit reb_tools_particle_to_orbit_err(double G, struct reb_particle p
     else{
         o.T = p.sim->t - o.M/fabs(o.n);         // time of pericenter passage (M = n(t-T).  Works for hyperbolic with fabs and n defined as above).
     }
-
-	return o;
+    if (!_reb_orbit_isfinite(o)){
+		*err = 3;								// at least one calculation failed
+    }
+    return o;
 }
 
 

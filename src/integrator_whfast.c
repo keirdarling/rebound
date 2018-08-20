@@ -312,50 +312,52 @@ void reb_whfast_kepler_solver_with_var(const struct reb_simulation* const r, str
         reb_warning((struct reb_simulation* const)r,"WHFast convergence issue. Timestep is larger than at least one orbital period.");
     }
     //Variations
-    const double r0 = sqrt(p1.x*p1.x + p1.y*p1.y + p1.z*p1.z);
-    const double r0i = 1./r0;
-    const double v2 =  p1.vx*p1.vx + p1.vy*p1.vy + p1.vz*p1.vz;
-    const double beta = 2.*M*r0i - v2;
-    const double eta0 = p1.x*p1.vx + p1.y*p1.vy + p1.z*p1.vz;
-    const double zeta0 = M - beta*r0;
-    double Gs[6]; 
-    stiefel_Gs(Gs, beta, X);    // Recalculate (to get Gs[0] to Gs[5])
-    const double eta0Gs1zeta0Gs2 = eta0*Gs[1] + zeta0*Gs[2];
-    double ri = 1./(r0 + eta0Gs1zeta0Gs2);
-    double f = -M*Gs[2]*r0i;
-    double g = _dt - M*Gs[3];
-    double fd = -M*Gs[1]*r0i*ri; 
-    double gd = -M*Gs[2]*ri; 
-    for (int v=0;v<r->var_config_N;v++){
-        struct reb_variational_configuration const vc = r->var_config[v];
-        const int index = vc.index;
-        struct reb_particle dp1 = p_j[i+index];
-        double dr0 = (dp1.x*p1.x + dp1.y*p1.y + dp1.z*p1.z)*r0i;
-        double dbeta = -2.*M*dr0*r0i*r0i - 2.* (dp1.vx*p1.vx + dp1.vy*p1.vy + dp1.vz*p1.vz);
-        double deta0 = dp1.x*p1.vx + dp1.y*p1.vy + dp1.z*p1.vz
-                 + p1.x*dp1.vx + p1.y*dp1.vy + p1.z*dp1.vz;
-        double dzeta0 = -beta*dr0 - r0*dbeta;
-        double G3beta = 0.5*(3.*Gs[5]-X*Gs[4]);
-        double G2beta = 0.5*(2.*Gs[4]-X*Gs[3]);
-        double G1beta = 0.5*(Gs[3]-X*Gs[2]);
-        double tbeta = eta0*G2beta + zeta0*G3beta;
-        double dX = -1.*ri*(X*dr0 + Gs[2]*deta0+Gs[3]*dzeta0+tbeta*dbeta);
-        double dG1 = Gs[0]*dX + G1beta*dbeta; 
-        double dG2 = Gs[1]*dX + G2beta*dbeta;
-        double dG3 = Gs[2]*dX + G3beta*dbeta;
-        double dr = dr0 + Gs[1]*deta0 + Gs[2]*dzeta0 + eta0*dG1 + zeta0*dG2;
-        double df = M*Gs[2]*dr0*r0i*r0i - M*dG2*r0i;
-        double dg = -M*dG3;
-        double dfd = -M*dG1*r0i*ri + M*Gs[1]*(dr0*r0i+dr*ri)*r0i*ri;
-        double dgd = -M*dG2*ri + M*Gs[2]*dr*ri*ri;
-    
-        p_j[i+index].x += f*dp1.x + g*dp1.vx + df*p1.x + dg*p1.vx;
-        p_j[i+index].y += f*dp1.y + g*dp1.vy + df*p1.y + dg*p1.vy;
-        p_j[i+index].z += f*dp1.z + g*dp1.vz + df*p1.z + dg*p1.vz;
+    if (r->var_config_N){
+        const double r0 = sqrt(p1.x*p1.x + p1.y*p1.y + p1.z*p1.z);
+        const double r0i = 1./r0;
+        const double v2 =  p1.vx*p1.vx + p1.vy*p1.vy + p1.vz*p1.vz;
+        const double beta = 2.*M*r0i - v2;
+        const double eta0 = p1.x*p1.vx + p1.y*p1.vy + p1.z*p1.vz;
+        const double zeta0 = M - beta*r0;
+        double Gs[6]; 
+        stiefel_Gs(Gs, beta, X);    // Recalculate (to get Gs[0] to Gs[5])
+        const double eta0Gs1zeta0Gs2 = eta0*Gs[1] + zeta0*Gs[2];
+        double ri = 1./(r0 + eta0Gs1zeta0Gs2);
+        double f = -M*Gs[2]*r0i;
+        double g = _dt - M*Gs[3];
+        double fd = -M*Gs[1]*r0i*ri; 
+        double gd = -M*Gs[2]*ri; 
+        for (int v=0;v<r->var_config_N;v++){
+            struct reb_variational_configuration const vc = r->var_config[v];
+            const int index = vc.index;
+            struct reb_particle dp1 = p_j[i+index];
+            double dr0 = (dp1.x*p1.x + dp1.y*p1.y + dp1.z*p1.z)*r0i;
+            double dbeta = -2.*M*dr0*r0i*r0i - 2.* (dp1.vx*p1.vx + dp1.vy*p1.vy + dp1.vz*p1.vz);
+            double deta0 = dp1.x*p1.vx + dp1.y*p1.vy + dp1.z*p1.vz
+                     + p1.x*dp1.vx + p1.y*dp1.vy + p1.z*dp1.vz;
+            double dzeta0 = -beta*dr0 - r0*dbeta;
+            double G3beta = 0.5*(3.*Gs[5]-X*Gs[4]);
+            double G2beta = 0.5*(2.*Gs[4]-X*Gs[3]);
+            double G1beta = 0.5*(Gs[3]-X*Gs[2]);
+            double tbeta = eta0*G2beta + zeta0*G3beta;
+            double dX = -1.*ri*(X*dr0 + Gs[2]*deta0+Gs[3]*dzeta0+tbeta*dbeta);
+            double dG1 = Gs[0]*dX + G1beta*dbeta; 
+            double dG2 = Gs[1]*dX + G2beta*dbeta;
+            double dG3 = Gs[2]*dX + G3beta*dbeta;
+            double dr = dr0 + Gs[1]*deta0 + Gs[2]*dzeta0 + eta0*dG1 + zeta0*dG2;
+            double df = M*Gs[2]*dr0*r0i*r0i - M*dG2*r0i;
+            double dg = -M*dG3;
+            double dfd = -M*dG1*r0i*ri + M*Gs[1]*(dr0*r0i+dr*ri)*r0i*ri;
+            double dgd = -M*dG2*ri + M*Gs[2]*dr*ri*ri;
+        
+            p_j[i+index].x += f*dp1.x + g*dp1.vx + df*p1.x + dg*p1.vx;
+            p_j[i+index].y += f*dp1.y + g*dp1.vy + df*p1.y + dg*p1.vy;
+            p_j[i+index].z += f*dp1.z + g*dp1.vz + df*p1.z + dg*p1.vz;
 
-        p_j[i+index].vx += fd*dp1.x + gd*dp1.vx + dfd*p1.x + dgd*p1.vx;
-        p_j[i+index].vy += fd*dp1.y + gd*dp1.vy + dfd*p1.y + dgd*p1.vy;
-        p_j[i+index].vz += fd*dp1.z + gd*dp1.vz + dfd*p1.z + dgd*p1.vz;
+            p_j[i+index].vx += fd*dp1.x + gd*dp1.vx + dfd*p1.x + dgd*p1.vx;
+            p_j[i+index].vy += fd*dp1.y + gd*dp1.vy + dfd*p1.y + dgd*p1.vy;
+            p_j[i+index].vz += fd*dp1.z + gd*dp1.vz + dfd*p1.z + dgd*p1.vz;
+        }
     }
 }
 

@@ -148,8 +148,8 @@ static void stiefel_Gs3(double *restrict Gs, double beta, double X) {
 #define WHFAST_NMAX_NEWT  32    ///< Maximum number of iterations for Newton's method
 /************************************
  * Keplerian motion for one planet  */
-void reb_whfast_kepler_solver(const struct reb_simulation* const r, struct reb_particle* const restrict p_j, const double M, unsigned int i, double _dt){
-    const struct reb_particle p1 = p_j[i];
+int reb_whfast_kepler_solver(struct reb_particle* const restrict p, const double M, double _dt, double* X_return){
+    const struct reb_particle p1 = *p;
 
     const double r0 = sqrt(p1.x*p1.x + p1.y*p1.y + p1.z*p1.z);
     const double r0i = 1./r0;
@@ -158,7 +158,8 @@ void reb_whfast_kepler_solver(const struct reb_simulation* const r, struct reb_p
     const double eta0 = p1.x*p1.vx + p1.y*p1.vy + p1.z*p1.vz;
     const double zeta0 = M - beta*r0;
     double X;
-    double Gs[6]; 
+    int timestep_warning = 0;
+    double Gs[4];        // len(Gs)==4 for normal particles, need len(Gs)==6 for variational particles 
     double invperiod=0;  // only used for beta>0. Set to 0 only to suppress compiler warnings.
     double X_per_period = nan(""); // only used for beta>0. nan triggers Newton's method for beta<0.
         
@@ -167,11 +168,8 @@ void reb_whfast_kepler_solver(const struct reb_simulation* const r, struct reb_p
         const double sqrt_beta = sqrt(beta);
         invperiod = sqrt_beta*beta/(2.*M_PI*M);
         X_per_period = 2.*M_PI/sqrt_beta;
-        if (fabs(_dt)*invperiod>1. && r->ri_whfast.timestep_warning == 0){
-            // Ignoring const qualifiers. This warning should not have any effect on
-            // other parts of the code, nor is it vital to show it.
-            ((struct reb_simulation* const)r)->ri_whfast.timestep_warning++;
-            reb_warning((struct reb_simulation* const)r,"WHFast convergence issue. Timestep is larger than at least one orbital period.");
+        if (fabs(_dt)*invperiod>1.){
+            timestep_warning = 1;
         }
         //X = _dt*invperiod*X_per_period; // first order guess 
         const double dtr0i = _dt*r0i;
@@ -290,19 +288,47 @@ void reb_whfast_kepler_solver(const struct reb_simulation* const r, struct reb_p
     double fd = -M*Gs[1]*r0i*ri; 
     double gd = -M*Gs[2]*ri; 
         
-    p_j[i].x += f*p1.x + g*p1.vx;
-    p_j[i].y += f*p1.y + g*p1.vy;
-    p_j[i].z += f*p1.z + g*p1.vz;
-        
-    p_j[i].vx += fd*p1.x + gd*p1.vx;
-    p_j[i].vy += fd*p1.y + gd*p1.vy;
-    p_j[i].vz += fd*p1.z + gd*p1.vz;
+    p->x += f*p1.x + g*p1.vx;
+    p->y += f*p1.y + g*p1.vy;
+    p->z += f*p1.z + g*p1.vz;
+    
+    p->vx += fd*p1.x + gd*p1.vx;
+    p->vy += fd*p1.y + gd*p1.vy;
+    p->vz += fd*p1.z + gd*p1.vz;
 
+    *X_return = X;
+
+    return timestep_warning;
+}
+
+void reb_whfast_kepler_solver_with_var(const struct reb_simulation* const r, struct reb_particle* const restrict p_j, const double M, unsigned int i, double _dt){
+    struct reb_particle p1 = p_j[i]; // Keep copy for variational equations
+    double X=0;
+    int timestep_warning = reb_whfast_kepler_solver(&(p_j[i]),M,_dt,&X);
+    if (timestep_warning && r->ri_whfast.timestep_warning == 0){
+        // Ignoring const qualifiers. This warning should not have any effect on
+        // other parts of the code, nor is it vital to show it.
+        ((struct reb_simulation* const)r)->ri_whfast.timestep_warning++;
+        reb_warning((struct reb_simulation* const)r,"WHFast convergence issue. Timestep is larger than at least one orbital period.");
+    }
     //Variations
+    const double r0 = sqrt(p1.x*p1.x + p1.y*p1.y + p1.z*p1.z);
+    const double r0i = 1./r0;
+    const double v2 =  p1.vx*p1.vx + p1.vy*p1.vy + p1.vz*p1.vz;
+    const double beta = 2.*M*r0i - v2;
+    const double eta0 = p1.x*p1.vx + p1.y*p1.vy + p1.z*p1.vz;
+    const double zeta0 = M - beta*r0;
+    double Gs[6]; 
+    stiefel_Gs(Gs, beta, X);    // Recalculate (to get Gs[0] to Gs[5])
+    const double eta0Gs1zeta0Gs2 = eta0*Gs[1] + zeta0*Gs[2];
+    double ri = 1./(r0 + eta0Gs1zeta0Gs2);
+    double f = -M*Gs[2]*r0i;
+    double g = _dt - M*Gs[3];
+    double fd = -M*Gs[1]*r0i*ri; 
+    double gd = -M*Gs[2]*ri; 
     for (int v=0;v<r->var_config_N;v++){
         struct reb_variational_configuration const vc = r->var_config[v];
         const int index = vc.index;
-        stiefel_Gs(Gs, beta, X);    // Recalculate (to get Gs[4] and Gs[5])
         struct reb_particle dp1 = p_j[i+index];
         double dr0 = (dp1.x*p1.x + dp1.y*p1.y + dp1.z*p1.z)*r0i;
         double dbeta = -2.*M*dr0*r0i*r0i - 2.* (dp1.vx*p1.vx + dp1.vy*p1.vy + dp1.vz*p1.vz);
@@ -331,7 +357,6 @@ void reb_whfast_kepler_solver(const struct reb_simulation* const r, struct reb_p
         p_j[i+index].vy += fd*dp1.y + gd*dp1.vy + dfd*p1.y + dgd*p1.vy;
         p_j[i+index].vz += fd*dp1.z + gd*dp1.vz + dfd*p1.z + dgd*p1.vz;
     }
-
 }
 
 /***************************** 
@@ -483,7 +508,7 @@ void reb_whfast_kepler_step(const struct reb_simulation* const r, const double _
                 eta = m0+p_j[i].m;
                 break;
         };
-        reb_whfast_kepler_solver(r, p_j, eta*G, i, _dt);
+        reb_whfast_kepler_solver_with_var(r, p_j, eta*G, i, _dt);
     }
 }
 

@@ -3723,7 +3723,7 @@ c
       outfile(2) = "b.txt"
       outfile(3) = "c.txt"
       do j = 1, nbod
-        id(j) = "bod"
+        id(j) = "bodyname"
       end do
       call mdt_mvs (time,tstart,h0,tol,rmax,en,am,jcen,rcen,nbod,
      %  nbig,m,x,v,s,rphys,rcrit,rce,stat,id,ngf,algor,opt,dtflag,

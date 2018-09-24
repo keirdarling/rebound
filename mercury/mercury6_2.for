@@ -3698,16 +3698,20 @@ c ===
 c
 c------------------------------------------------------------------------------
 c
+
+c     WRAPPER FOR MDT_MVS. Hanno Rein Sept 2018
       subroutine mdt_mvsp (time,tstart,h0,tol,rmax,en,am,jcen,rcen,nbod,
-     %  nbig,m,x,v,s,rphys,rcrit,rce,stat,ngf,algor,opt,dtflag,
+     %  nbig,m,xh,vh,s,rphys,rcrit,rce,stat,ngf,algor,opt,dtflag,
      %  ngflag,opflag,colflag,nclo,iclo,jclo,dclo,tclo,ixvclo,jxvclo,
      %  lmem)
       implicit none
       include 'mercury.inc'
+
+c     VARIABLES IN/OUT
       integer nbod,nbig,stat(nbod),algor,opt(8),dtflag,ngflag,opflag
       integer colflag,lmem(NMESS),nclo,iclo(CMAX),jclo(CMAX)
       real*8 time,tstart,h0,tol,rmax,en(3),am(3),jcen(3),rcen
-      real*8 m(nbod),x(3,nbod),v(3,nbod),s(3,nbod),rphys(nbod)
+      real*8 m(nbod),xh(3,nbod),vh(3,nbod),s(3,nbod),rphys(nbod)
       real*8 rce(nbod),rcrit(nbod),ngf(4,nbod),tclo(CMAX),dclo(CMAX)
       real*8 ixvclo(6,CMAX),jxvclo(6,CMAX)
       
@@ -3717,18 +3721,30 @@ c
       
       external mdt_mvs
 
+c     VARIABLES INTERNAL
       integer j
+      real*8 x(3,NMAX),v(3,NMAX)
+     
+c     TO INTERNAL COORDINATES 
+      call mco_h2mvs (time,jcen,nbod,nbig,h0,m,xh,vh,x,v,ngf,ngflag,opt)
 
+c     FAKE FILENAMES 
       outfile(1) = "a.txt"
       outfile(2) = "b.txt"
       outfile(3) = "c.txt"
       do j = 1, nbod
         id(j) = "bodyname"
       end do
+
+c     DO ONE STEP
       call mdt_mvs (time,tstart,h0,tol,rmax,en,am,jcen,rcen,nbod,
      %  nbig,m,x,v,s,rphys,rcrit,rce,stat,id,ngf,algor,opt,dtflag,
      %  ngflag,opflag,colflag,nclo,iclo,jclo,dclo,tclo,ixvclo,jxvclo,
      %  outfile,mem,lmem)
+
+
+c     TO HELIOCENTRIC COORDINATES
+      call mco_mvs2h (time,jcen,nbod,nbig,h0,m,x,v,xh,vh,ngf,ngflag,opt)
       return
       end
 

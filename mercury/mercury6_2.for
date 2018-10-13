@@ -3384,6 +3384,61 @@ c ===
 c
 c------------------------------------------------------------------------------
 c
+
+c     Hanno Rein Sept 2018 for call i python
+      subroutine mdt_hyp (time,tstart,h0,tol,rmax,en,am,jcen,rcen,nbod,
+     %  nbig,m,xh,vh,s,rphys,rcrit,rce,stat,ngf,algor,opt,dtflag,
+     %  ngflag,opflag,colflag,nclo,iclo,jclo,dclo,tclo,ixvclo,jxvclo,
+     %  lmem)
+c
+      implicit none
+      include 'mercury.inc'
+c
+c Input/Output
+      integer nbod,nbig,stat(nbod),algor,opt(8),dtflag,ngflag,opflag
+      integer colflag,lmem(NMESS),nclo,iclo(CMAX),jclo(CMAX)
+      real*8 time,tstart,h0,tol,rmax,en(3),am(3),jcen(3),rcen
+      real*8 m(nbod),xh(3,nbod),vh(3,nbod),s(3,nbod),rphys(nbod)
+      real*8 rce(nbod),rcrit(nbod),ngf(4,nbod),tclo(CMAX),dclo(CMAX)
+      real*8 ixvclo(6,CMAX),jxvclo(6,CMAX)
+c
+c Local
+      integer j,nce,ice(NMAX),jce(NMAX),ce(NMAX),iflag
+      real*8 a(3,NMAX),hby2,hrec,x0(3,NMAX),v0(3,NMAX),mvsum(3),temp
+      real*8 angf(3,NMAX),ausr(3,NMAX)
+      external mfo_hkce
+
+c     VARIABLES INTERNAL
+      real*8 x(3,NMAX),v(3,NMAX)
+      character*80 outfile(3),mem(NMESS)
+      character*8 id(nbod)
+
+c     TO INTERNAL COORDINATES 
+      call mco_h2dh (time,jcen,nbod,nbig,h0,m,xh,vh,x,v,ngf,ngflag,opt)
+
+c     FAKE FILENAMES 
+      outfile(1) = "a.txt"
+      outfile(2) = "b.txt"
+      outfile(3) = "c.txt"
+      do j = 1, nbod
+        id(j) = "bodyname"
+      end do
+
+c     DO ONE STEP
+      call mdt_hy (time,tstart,h0,tol,rmax,en,am,jcen,rcen,nbod,
+     %  nbig,m,x,v,s,rphys,rcrit,rce,stat,id,ngf,algor,opt,dtflag,
+     %  ngflag,opflag,colflag,nclo,iclo,jclo,dclo,tclo,ixvclo,jxvclo,
+     %  outfile,mem,lmem)
+
+
+c     TO HELIOCENTRIC COORDINATES
+      call mco_dh2h (time,jcen,nbod,nbig,h0,m,x,v,xh,vh,ngf,ngflag,opt)
+      return
+
+
+      end
+
+
       subroutine mdt_hy (time,tstart,h0,tol,rmax,en,am,jcen,rcen,nbod,
      %  nbig,m,x,v,s,rphys,rcrit,rce,stat,id,ngf,algor,opt,dtflag,
      %  ngflag,opflag,colflag,nclo,iclo,jclo,dclo,tclo,ixvclo,jxvclo,

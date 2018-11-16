@@ -370,6 +370,7 @@ void reb_reset_temporary_pointers(struct reb_simulation* const r){
     r->ri_mercurius.encounterParticles = NULL;
     r->ri_mercurius.p_hold = NULL;
     r->ri_mercurius.keep_unsynchronized = 0;
+    r->ri_mercurius.kmode = 0;
 
     // ********** JANUS
     r->ri_janus.allocated_N = 0;
@@ -521,6 +522,7 @@ void reb_init_simulation(struct reb_simulation* r){
     r->ri_mercurius.encounterN = 0;
     r->ri_mercurius.m0 = 0;
     r->ri_mercurius.rcrit = 3;
+    r->ri_mercurius.kmode = 0;
 
     // Tree parameters. Will not be used unless gravity or collision search makes use of tree.
     r->tree_needs_update= 0;

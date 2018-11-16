@@ -222,6 +222,7 @@ struct reb_simulation_integrator_mercurius {
     
     unsigned int is_synchronized;   ///< Flag to determine if current particle structure is synchronized
     unsigned int mode;          ///< Internal. 0 if WH is operating, 1 if IAS15 is operating.
+    int kmode; // for testing only
     unsigned int encounterN;    ///< Number of particles currently having an encounter
     unsigned int globalN;       
     unsigned int globalNactive;

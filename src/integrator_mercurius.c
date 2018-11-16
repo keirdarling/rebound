@@ -52,17 +52,22 @@ double reb_integrator_mercurius_K(double r, double rcrit){
         return 10.*(y*y*y) - 15.*(y*y*y*y) + 6.*(y*y*y*y*y);
     }
 }
-double reb_integrator_mercurius_dKdr(double r, double rcrit){
+double reb_integrator_mercurius_dKdr(double r, double rcrit,int kmode){
     // Derivative of the changeover function is not used. 
     // It does not seem to improve accuracy.
     // It is somewhat unclear why this derivative is not in the 
     // original Mercury code either.
+    if (kmode==0){
+        return 0.;
+    }
+    if (kmode==1){
+        double y = (r-0.1*rcrit)/(0.9*rcrit);
+        if (y<0. || y >1.){
+            return 0.;
+        }
+        return 1./(0.9*rcrit) *( 30.*y*y - 60.*y*y*y + 30.*y*y*y*y);
+    }
     return 0.;
-    //double y = (r-0.1*rcrit)/(0.9*rcrit);
-    //if (y<0. || y >1.){
-    //    return 0.;
-    //}
-    //return 1./(0.9*rcrit) *( 30.*y*y - 60.*y*y*y + 30.*y*y*y*y);
 }
 
 static void reb_mercurius_encounterstep(struct reb_simulation* const r, const double _dt){
@@ -247,6 +252,16 @@ static void reb_mercurius_predict_encounters(struct reb_simulation* const r){
         }
     }
 }
+    
+void reb_set_rhill(struct reb_simulation* r, int N, double* rhill){
+    struct reb_simulation_integrator_mercurius* const rim = &(r->ri_mercurius);
+    rim->rhillallocatedN = N;
+    rim->rhill              = realloc(rim->rhill, sizeof(double)*N);
+    rim->recalculate_rhill_this_timestep        = 0;
+    for (int i=0;i<N;i++){
+        rim->rhill[i] = rhill[i];
+    }
+}
 
 void reb_integrator_mercurius_part1(struct reb_simulation* r){
     if (r->var_config_N){
@@ -405,6 +420,7 @@ void reb_integrator_mercurius_synchronize(struct reb_simulation* r){
 
 void reb_integrator_mercurius_reset(struct reb_simulation* r){
     r->ri_mercurius.mode = 0;
+    r->ri_mercurius.kmode = 0;
     r->ri_mercurius.encounterN = 0;
     r->ri_mercurius.globalN = 0;
     r->ri_mercurius.globalNactive = 0;

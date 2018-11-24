@@ -47,14 +47,9 @@ static double f(double x){
     return exp(-1./x);
 }
 
-static double fd(double x){
-    if (x<0) return 0;
-    return f(x)/(x*x);
-}
-
-double reb_integrator_mercurius_K(double r, double rcrit,int kmode){
+double reb_integrator_mercurius_K(double r, double rcrit, enum REB_MERCURIUS_KMODE kmode){
     // This is the changeover function.
-    if (kmode == 0 || kmode == 1){
+    if (kmode == REB_MERCURIUS_KMODE_MERCURY || kmode == REB_MERCURIUS_KMODE_POLY5){
         double y = (r-0.1*rcrit)/(0.9*rcrit);
         if (y<0.){
             return 0.;
@@ -64,7 +59,7 @@ double reb_integrator_mercurius_K(double r, double rcrit,int kmode){
             return 10.*(y*y*y) - 15.*(y*y*y*y) + 6.*(y*y*y*y*y);
         }
     }
-    if (kmode==2){
+    if (kmode==REB_MERCURIUS_KMODE_POLY7){
         double y = (r-0.1*rcrit)/(0.9*rcrit);
         if (y<0.){
             return 0.;
@@ -74,7 +69,7 @@ double reb_integrator_mercurius_K(double r, double rcrit,int kmode){
             return 35.*y*y*y*y-84.*y*y*y*y*y+70.*y*y*y*y*y*y-20.*y*y*y*y*y*y*y;
         }
     }
-    if (kmode==3){
+    if (kmode==REB_MERCURIUS_KMODE_INF){
         double y = (r-0.1*rcrit)/(0.9*rcrit);
         if (y<0.){
             return 0.;
@@ -86,23 +81,29 @@ double reb_integrator_mercurius_K(double r, double rcrit,int kmode){
     }
     return 1.;
 }
-double reb_integrator_mercurius_dKdr(double r, double rcrit,int kmode){
+double reb_integrator_mercurius_dKdr(double r, double rcrit, enum REB_MERCURIUS_KMODE kmode){
     // Derivative of the changeover function is not used. 
     // It does not seem to improve accuracy.
     // It is somewhat unclear why this derivative is not in the 
     // original Mercury code either.
-    if (kmode==1){
+    if (kmode==REB_MERCURIUS_KMODE_POLY5){
         double y = (r-0.1*rcrit)/(0.9*rcrit);
         if (y<0. || y >1.){
             return 0.;
         }
         return 1./(0.9*rcrit) *( 30.*y*y - 60.*y*y*y + 30.*y*y*y*y);
     }
-    if (kmode == 3){
+    if (kmode==REB_MERCURIUS_KMODE_POLY7){
         double y = (r-0.1*rcrit)/(0.9*rcrit);
-        if (y<0.){
+        if (y<0. || y >1.){
             return 0.;
-        }else if (y>1.){
+        }else{
+            return 1./(0.9*rcrit) *(35.*4.*y*y*y-84.*5.*y*y*y*y+70.*6.*y*y*y*y*y-20.*7.*y*y*y*y*y*y);
+        }
+    }
+    if (kmode==REB_MERCURIUS_KMODE_INF){
+        double y = (r-0.1*rcrit)/(0.9*rcrit);
+        if (y<0. || y >1.){
             return 0.;
         }else{
             return 1./(0.9*rcrit)*( f(y)/y/y /(f(y) + f(1.-y)) - 
@@ -281,7 +282,7 @@ static void reb_mercurius_predict_encounters(struct reb_simulation* const r){
 
             const double rchange = MAX(rhill[i],rhill[j]);
             
-            if (sqrt(rmin)< 2.1*rchange){
+            if (sqrt(rmin)< 1.1*rchange){
                 if (rim->encounterIndicies[i]==0){
                     rim->encounterIndicies[i] = i;
                     rim->encounterN++;
@@ -462,7 +463,7 @@ void reb_integrator_mercurius_synchronize(struct reb_simulation* r){
 
 void reb_integrator_mercurius_reset(struct reb_simulation* r){
     r->ri_mercurius.mode = 0;
-    r->ri_mercurius.kmode = 0;
+    r->ri_mercurius.kmode = REB_MERCURIUS_KMODE_MERCURY;
     r->ri_mercurius.encounterN = 0;
     r->ri_mercurius.globalN = 0;
     r->ri_mercurius.globalNactive = 0;

@@ -110,6 +110,17 @@ struct reb_ghostbox{
 };
 
 /**
+ * @brief Switching function for the Mercurius integrator
+ */
+enum REB_MERCURIUS_KMODE {
+    REB_MERCURIUS_KMODE_MERCURY = 0,   ///< Same switching function as used in Mercury (default)
+    REB_MERCURIUS_KMODE_POLY5 = 1,     ///< 5th order polynomial switching function 
+    REB_MERCURIUS_KMODE_POLY7 = 2,     ///< 7th order polynomial switching function 
+    REB_MERCURIUS_KMODE_INF = 3,       ///< Infinitely differentiable switching function 
+};
+
+
+/**
  * @defgroup IntegratorStructs 
  * @details Structures for the various integrators.
  * @{
@@ -222,10 +233,10 @@ struct reb_simulation_integrator_mercurius {
     
     unsigned int is_synchronized;   ///< Flag to determine if current particle structure is synchronized
     unsigned int mode;              ///< Internal. 0 if WH is operating, 1 if IAS15 is operating.
-    unsigned int kmode;             ///< Selects different changeover functions
+    enum REB_MERCURIUS_KMODE kmode; ///< Selects different changeover functions
     unsigned int encounterN;        ///< Number of particles currently having an encounter
-    unsigned int globalN;       
-    unsigned int globalNactive;
+    int globalN;       
+    int globalNactive;
     unsigned int allocatedN;
     unsigned int rhillallocatedN;
     unsigned int encounterAllocatedN;
@@ -462,7 +473,6 @@ enum REB_STATUS {
     REB_EXIT_SIGINT = 6,        ///< SIGINT received. Simulation stopped.
     REB_EXIT_COLLISION = 7,     ///< The integration ends early because two particles collided. 
 };
-
 
 /**
  * @brief Struct describing the properties of a set of variational equations.

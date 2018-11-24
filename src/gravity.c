@@ -406,8 +406,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
         case REB_GRAVITY_MERCURIUS:
         {
             const double m0 = r->ri_mercurius.m0;
-            const int kmode  = r->ri_mercurius.kmode;
-            const double kparam  = r->ri_mercurius.kparam;
+            const enum REB_MERCURIUS_KMODE kmode  = r->ri_mercurius.kmode;
             switch (r->ri_mercurius.mode){
                 case 0: // WHFAST part
                 {
@@ -431,8 +430,8 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dz = particles[i].z - particles[j].z;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
                             const double rchange = MAX(rhill[i],rhill[j]);
-                            const double K = reb_integrator_mercurius_K(_r,rchange,kmode,kparam);
-                            const double dKdr = reb_integrator_mercurius_dKdr(_r,rchange,kmode,kparam);
+                            const double K = reb_integrator_mercurius_K(_r,rchange,kmode);
+                            const double dKdr = reb_integrator_mercurius_dKdr(_r,rchange,kmode);
                             const double mj = particles[j].m;
                             const double prefact = -G*mj*(K/(_r*_r*_r)-dKdr/(_r*_r));
                             particles[i].ax    += prefact*dx;
@@ -451,8 +450,8 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dz = particles[i].z - particles[j].z;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
                             const double rchange = MAX(rhill[i],rhill[j]);
-                            const double K = reb_integrator_mercurius_K(_r,rchange,kmode,kparam);
-                            const double dKdr = reb_integrator_mercurius_dKdr(_r,rchange,kmode,kparam);
+                            const double K = reb_integrator_mercurius_K(_r,rchange,kmode);
+                            const double dKdr = reb_integrator_mercurius_dKdr(_r,rchange,kmode);
                             const double mj = particles[j].m;
                             const double prefact = -G*mj*(K/(_r*_r*_r)-dKdr/(_r*_r));
                             particles[i].ax    += prefact*dx;
@@ -494,8 +493,8 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double mj = particles[j].m;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
                             const double rchange = MAX(rhill[i],rhill[j]);
-                            const double K = reb_integrator_mercurius_K(_r,rchange,kmode,kparam);
-                            const double dKdr = reb_integrator_mercurius_dKdr(_r,rchange,kmode,kparam);
+                            const double K = reb_integrator_mercurius_K(_r,rchange,kmode);
+                            const double dKdr = reb_integrator_mercurius_dKdr(_r,rchange,kmode);
                             double prefact = -G*mj*((1.-K)/(_r*_r*_r)+dKdr/(_r*_r));
                             particles[i].ax    += prefact*dx;
                             particles[i].ay    += prefact*dy;
@@ -517,8 +516,8 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double mj = particles[j].m;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
                             const double rchange = MAX(rhill[i],rhill[j]);
-                            const double K = reb_integrator_mercurius_K(_r,rchange,kmode,kparam);
-                            const double dKdr = reb_integrator_mercurius_dKdr(_r,rchange,kmode,kparam);
+                            const double K = reb_integrator_mercurius_K(_r,rchange,kmode);
+                            const double dKdr = reb_integrator_mercurius_dKdr(_r,rchange,kmode);
                             double prefact = -G*mj*((1.-K)/(_r*_r*_r)+dKdr/(_r*_r));
                             particles[i].ax    += prefact*dx;
                             particles[i].ay    += prefact*dy;

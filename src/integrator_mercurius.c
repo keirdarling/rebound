@@ -41,31 +41,73 @@
 #define MIN(a, b) ((a) > (b) ? (b) : (a))    ///< Returns the minimum of a and b
 #define MAX(a, b) ((a) > (b) ? (a) : (b))    ///< Returns the maximum of a and b
 
-double reb_integrator_mercurius_K(double r, double rcrit){
+
+static double f(double x){
+    if (x<0) return 0;
+    return exp(-1./x);
+}
+
+static double fd(double x){
+    if (x<0) return 0;
+    return f(x)/(x*x);
+}
+
+double reb_integrator_mercurius_K(double r, double rcrit,int kmode){
     // This is the changeover function.
-    double y = (r-0.1*rcrit)/(0.9*rcrit);
-    if (y<0.){
-        return 0.;
-    }else if (y>1.){
-        return 1.;
-    }else{
-        return 10.*(y*y*y) - 15.*(y*y*y*y) + 6.*(y*y*y*y*y);
+    if (kmode == 0 || kmode == 1){
+        double y = (r-0.1*rcrit)/(0.9*rcrit);
+        if (y<0.){
+            return 0.;
+        }else if (y>1.){
+            return 1.;
+        }else{
+            return 10.*(y*y*y) - 15.*(y*y*y*y) + 6.*(y*y*y*y*y);
+        }
     }
+    if (kmode==2){
+        double y = (r-0.1*rcrit)/(0.9*rcrit);
+        if (y<0.){
+            return 0.;
+        }else if (y>1.){
+            return 1.;
+        }else{
+            return 35.*y*y*y*y-84.*y*y*y*y*y+70.*y*y*y*y*y*y-20.*y*y*y*y*y*y*y;
+        }
+    }
+    if (kmode==3){
+        double y = (r-0.1*rcrit)/(0.9*rcrit);
+        if (y<0.){
+            return 0.;
+        }else if (y>1.){
+            return 1.;
+        }else{
+            return f(y) /(f(y) + f(1.-y));
+        }
+    }
+    return 1.;
 }
 double reb_integrator_mercurius_dKdr(double r, double rcrit,int kmode){
     // Derivative of the changeover function is not used. 
     // It does not seem to improve accuracy.
     // It is somewhat unclear why this derivative is not in the 
     // original Mercury code either.
-    if (kmode==0){
-        return 0.;
-    }
     if (kmode==1){
         double y = (r-0.1*rcrit)/(0.9*rcrit);
         if (y<0. || y >1.){
             return 0.;
         }
         return 1./(0.9*rcrit) *( 30.*y*y - 60.*y*y*y + 30.*y*y*y*y);
+    }
+    if (kmode == 3){
+        double y = (r-0.1*rcrit)/(0.9*rcrit);
+        if (y<0.){
+            return 0.;
+        }else if (y>1.){
+            return 0.;
+        }else{
+            return 1./(0.9*rcrit)*( f(y)/y/y /(f(y) + f(1.-y)) - 
+                    ( f(y) /(f(y) + f(1.-y))/(f(y) + f(1.-y))*(f(y)/y/y - f(1.-y)/(1.-y)/(1.-y)) ));
+        }
     }
     return 0.;
 }
@@ -239,7 +281,7 @@ static void reb_mercurius_predict_encounters(struct reb_simulation* const r){
 
             const double rchange = MAX(rhill[i],rhill[j]);
             
-            if (sqrt(rmin)< 1.1*rchange){
+            if (sqrt(rmin)< 2.1*rchange){
                 if (rim->encounterIndicies[i]==0){
                     rim->encounterIndicies[i] = i;
                     rim->encounterN++;

@@ -1599,6 +1599,7 @@ class reb_simulation_integrator_mercurius(Structure):
                 ("_is_synchronized", c_uint),
                 ("_mode", c_uint),
                 ("kmode", c_int),
+                ("kparam", c_double),
                 ("_encounterN", c_uint),
                 ("_globalN", c_uint),
                 ("_globalNactive", c_uint),

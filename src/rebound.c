@@ -370,7 +370,6 @@ void reb_reset_temporary_pointers(struct reb_simulation* const r){
     r->ri_mercurius.encounterParticles = NULL;
     r->ri_mercurius.p_hold = NULL;
     r->ri_mercurius.keep_unsynchronized = 0;
-    r->ri_mercurius.kmode = 0;
 
     // ********** JANUS
     r->ri_janus.allocated_N = 0;

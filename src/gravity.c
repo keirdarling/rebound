@@ -429,8 +429,8 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dy = particles[i].y - particles[j].y;
                             const double dz = particles[i].z - particles[j].z;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
-                            const double rchange = MAX(dcrit[i],dcrit[j]);
-                            const double L = _L(r,_r,rchange);
+                            const double dcritmax = MAX(dcrit[i],dcrit[j]);
+                            const double L = _L(r,_r,dcritmax);
                             const double mj = particles[j].m;
                             const double prefact = -G*mj*L/(_r*_r*_r);
                             particles[i].ax    += prefact*dx;
@@ -448,8 +448,8 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dy = particles[i].y - particles[j].y;
                             const double dz = particles[i].z - particles[j].z;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
-                            const double rchange = MAX(dcrit[i],dcrit[j]);
-                            const double L = _L(r,_r,rchange);
+                            const double dcritmax = MAX(dcrit[i],dcrit[j]);
+                            const double L = _L(r,_r,dcritmax);
                             const double mj = particles[j].m;
                             const double prefact = -G*mj*L/(_r*_r*_r);
                             particles[i].ax    += prefact*dx;
@@ -490,8 +490,8 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dz = z - particles[j].z;
                             const double mj = particles[j].m;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
-                            const double rchange = MAX(dcrit[i],dcrit[j]);
-                            const double L = _L(r,_r,rchange);
+                            const double dcritmax = MAX(dcrit[i],dcrit[j]);
+                            const double L = _L(r,_r,dcritmax);
                             double prefact = -G*mj*(1.-L)/(_r*_r*_r);
                             particles[i].ax    += prefact*dx;
                             particles[i].ay    += prefact*dy;
@@ -512,8 +512,8 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dz = z - particles[j].z;
                             const double mj = particles[j].m;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
-                            const double rchange = MAX(dcrit[i],dcrit[j]);
-                            const double L = _L(r,_r,rchange);
+                            const double dcritmax = MAX(dcrit[i],dcrit[j]);
+                            const double L = _L(r,_r,dcritmax);
                             double prefact = -G*mj*(1.-L)/(_r*_r*_r);
                             particles[i].ax    += prefact*dx;
                             particles[i].ay    += prefact*dy;

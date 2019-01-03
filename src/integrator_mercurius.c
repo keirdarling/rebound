@@ -53,6 +53,23 @@ double reb_integrator_mercurius_L_mercury(const struct reb_simulation* const r, 
     }
 }
 
+static double f(double x){
+    if (x<0) return 0;
+    return exp(-1./x);
+}
+
+double reb_integrator_mercurius_L_infinity(const struct reb_simulation* const r, double d, double dcrit){
+    // Infinitely differentiable function.
+    double y = (d-0.1*dcrit)/(0.9*dcrit);
+    if (y<0.){
+        return 0.;
+    }else if (y>1.){
+        return 1.;
+    }else{
+        return f(y) /(f(y) + f(1.-y));
+    }
+}
+
 static void reb_mercurius_encounterstep(struct reb_simulation* const r, const double _dt){
     // This function sets up the particle structures needed for IAS15 to run.
     // Only particles having a close encounter are integrated by IAS15.

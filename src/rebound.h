@@ -1167,6 +1167,19 @@ struct reb_particle* reb_get_particle_by_hash(struct reb_simulation* const r, ui
  */
 void reb_run_heartbeat(struct reb_simulation* const r);
 
+
+/**
+ * @brief A force switching function for the MERCURIUS integrator. This function implements 
+ * the same polynomial switching function used in MERCURY. 
+ */
+double reb_integrator_mercurius_L_mercury(const struct reb_simulation* const r, double d, double dcrit);           
+
+/**
+ * @brief A force switching function for the MERCURIUS integrator. This function implements 
+ * an infinitely differentiable switching function. 
+ */
+double reb_integrator_mercurius_L_infinite(const struct reb_simulation* const r, double d, double dcrit);           
+
 /**
  * @brief Resolve collision by simply halting the integration and setting r->status=REB_EXIT_COLLISION (Default)
  */

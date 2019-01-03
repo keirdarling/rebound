@@ -548,7 +548,7 @@ void reb_init_simulation(struct reb_simulation* r){
     r->ri_mercurius.is_synchronized = 1;
     r->ri_mercurius.encounterN = 0;
     r->ri_mercurius.m0 = 0;
-    r->ri_mercurius.rcrit = 3;
+    r->ri_mercurius.hillfac = 3;
 
     // Tree parameters. Will not be used unless gravity or collision search makes use of tree.
     r->tree_needs_update= 0;

@@ -182,8 +182,23 @@ struct reb_simulation_integrator_ias15 {
  * @brief This structure contains variables and pointer used by the MERCURIUS integrator.
  */
 struct reb_simulation_integrator_mercurius {
-    double (*L) (const struct reb_simulation* const r, double d, double dcrit);  // switching function used 
-    double rcrit;               ///< Critical radius in units of Hill radii
+   /**
+    * @brief This is a function pointer to the force switching function used.
+    * @details If NULL (the default), the MERCURY switching function will be used.
+    * The argument d is the distance between two particles.
+    * The argument dcrit is the maximum of the critical distances of the two particles.
+    * The return value is a scalar between 0 and 1. If it always returns 1, then the
+    * integrator becomes the standard Wisdom-Holman integrator.
+    */
+    double (*L) (const struct reb_simulation* const r, double d, double dcrit);  
+    
+    /** 
+     * @brief Switching distance in units of the Hill radius 
+     * @brief The switching distances for particles are calculated automastically
+     * based on multiple criteria. One criteria calculates the Hill radius of 
+     * particles and then multiplies it with the hillfac variable. 
+     */ 
+    double hillfac;        
     
     /** 
      * @brief Setting this flag to one will recalculate heliocentric coordinates from the particle structure at the beginning of the next timestep. 
@@ -596,7 +611,7 @@ enum REB_BINARY_FIELD_TYPE {
     REB_BINARY_FIELD_TYPE_JANUS_ORDER = 115,
     REB_BINARY_FIELD_TYPE_JANUS_RECALC = 116,
     REB_BINARY_FIELD_TYPE_WHFAST_COORDINATES = 117,
-    REB_BINARY_FIELD_TYPE_MERCURIUS_RCRIT = 118,
+    REB_BINARY_FIELD_TYPE_MERCURIUS_HILLFAC = 118,
     REB_BINARY_FIELD_TYPE_MERCURIUS_SAFEMODE = 119,
     REB_BINARY_FIELD_TYPE_MERCURIUS_ISSYNCHRON = 120,
     REB_BINARY_FIELD_TYPE_MERCURIUS_M0 = 121,

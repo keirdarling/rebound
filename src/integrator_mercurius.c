@@ -303,7 +303,7 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
             // Criteria 2: current velocity
             rhill = MAX(rhill, sqrt(v2)*0.4*r->dt);
             // Criteria 3: Hill radius
-            rhill = MAX(rhill, rim->rcrit*a*pow(r->particles[i].m/(3.*r->particles[0].m),1./3.));
+            rhill = MAX(rhill, rim->hillfac*a*pow(r->particles[i].m/(3.*r->particles[0].m),1./3.));
             // Criteria 4: physical radius
             rhill = MAX(rhill, 2.*r->particles[i].r);
 
@@ -404,7 +404,7 @@ void reb_integrator_mercurius_reset(struct reb_simulation* r){
     r->ri_mercurius.globalN = 0;
     r->ri_mercurius.globalNactive = 0;
     r->ri_mercurius.m0 = 0;
-    r->ri_mercurius.rcrit = 3;
+    r->ri_mercurius.hillfac = 3;
     r->ri_mercurius.keep_unsynchronized = 0;
     r->ri_mercurius.recalculate_coordinates_this_timestep = 0;
     // Arrays

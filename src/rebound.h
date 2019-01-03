@@ -182,6 +182,7 @@ struct reb_simulation_integrator_ias15 {
  * @brief This structure contains variables and pointer used by the MERCURIUS integrator.
  */
 struct reb_simulation_integrator_mercurius {
+    double (*L) (const struct reb_simulation* const r, double d, double dcrit);  // switching function used 
     double rcrit;               ///< Critical radius in units of Hill radii
     
     /** 

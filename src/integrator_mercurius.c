@@ -41,9 +41,9 @@
 #define MIN(a, b) ((a) > (b) ? (b) : (a))    ///< Returns the minimum of a and b
 #define MAX(a, b) ((a) > (b) ? (a) : (b))    ///< Returns the maximum of a and b
 
-double reb_integrator_mercurius_K(double r, double rcrit){
-    // This is the changeover function.
-    double y = (r-0.1*rcrit)/(0.9*rcrit);
+double reb_integrator_mercurius_L_mercury(const struct reb_simulation* const r, double d, double dcrit){
+    // This is the changeover function used by the Mercury integrator.
+    double y = (d-0.1*dcrit)/(0.9*dcrit);
     if (y<0.){
         return 0.;
     }else if (y>1.){
@@ -51,18 +51,6 @@ double reb_integrator_mercurius_K(double r, double rcrit){
     }else{
         return 10.*(y*y*y) - 15.*(y*y*y*y) + 6.*(y*y*y*y*y);
     }
-}
-double reb_integrator_mercurius_dKdr(double r, double rcrit){
-    // Derivative of the changeover function is not used. 
-    // It does not seem to improve accuracy.
-    // It is somewhat unclear why this derivative is not in the 
-    // original Mercury code either.
-    return 0.;
-    //double y = (r-0.1*rcrit)/(0.9*rcrit);
-    //if (y<0. || y >1.){
-    //    return 0.;
-    //}
-    //return 1./(0.9*rcrit) *( 30.*y*y - 60.*y*y*y + 30.*y*y*y*y);
 }
 
 static void reb_mercurius_encounterstep(struct reb_simulation* const r, const double _dt){
@@ -330,6 +318,11 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
     r->gravity = REB_GRAVITY_MERCURIUS;
     rim->mode = 0;
     
+    if (rim->L == NULL){
+        // Setting default switching function
+        rim->L = reb_integrator_mercurius_L_mercury;
+    }
+    
     // Calculate collision with special function
     if (r->collision != REB_COLLISION_MERCURIUS && r->collision != REB_COLLISION_NONE){
         if (r->collision != REB_COLLISION_DIRECT){
@@ -405,6 +398,7 @@ void reb_integrator_mercurius_synchronize(struct reb_simulation* r){
 }
 
 void reb_integrator_mercurius_reset(struct reb_simulation* r){
+    r->ri_mercurius.L = NULL;
     r->ri_mercurius.mode = 0;
     r->ri_mercurius.encounterN = 0;
     r->ri_mercurius.globalN = 0;

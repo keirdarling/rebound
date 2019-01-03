@@ -312,14 +312,14 @@ int reb_input_field(struct reb_simulation* r, FILE* inf, enum reb_input_binary_m
                 }
             }
             break;
-        case REB_BINARY_FIELD_TYPE_MERCURIUS_RHILL:
-            if(r->ri_mercurius.rhill){
-                free(r->ri_mercurius.rhill);
+        case REB_BINARY_FIELD_TYPE_MERCURIUS_DCRIT:
+            if(r->ri_mercurius.dcrit){
+                free(r->ri_mercurius.dcrit);
             }
-            r->ri_mercurius.rhillallocatedN = (int)(field.size/sizeof(double));
+            r->ri_mercurius.dcrit_allocatedN = (int)(field.size/sizeof(double));
             if (field.size){
-                r->ri_mercurius.rhill = malloc(field.size);
-                reb_fread(r->ri_mercurius.rhill, field.size,1,inf,mem_stream);
+                r->ri_mercurius.dcrit = malloc(field.size);
+                reb_fread(r->ri_mercurius.dcrit, field.size,1,inf,mem_stream);
             }
             break;
         CASE_MALLOC(IAS15_AT,     r->ri_ias15.at);

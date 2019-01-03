@@ -264,11 +264,11 @@ int reb_remove(struct reb_simulation* const r, int index, int keepSorted){
 			riw->p_jh[j] = riw->p_jh[j+1];
 			rim->p_hold[j] = rim->p_hold[j+1];
 			rim->encounterIndicies[j] = rim->encounterIndicies[j+1];
-			rim->rhill[j] = rim->rhill[j+1];
+			rim->dcrit[j] = rim->dcrit[j+1];
 		}
         // Update additional parameter for local 
 		for(int j=index; j<r->N-1; j++){
-			rim->encounterRhill[j] = rim->encounterRhill[j+1];
+			rim->encounter_dcrit[j] = rim->encounter_dcrit[j+1];
 		}
     }
 	if (r->N==1){

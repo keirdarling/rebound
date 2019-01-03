@@ -71,7 +71,7 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     if (rim->encounterAllocatedN<rim->encounterN){
         rim->encounterAllocatedN = rim->encounterN;
         rim->encounterParticles = realloc(rim->encounterParticles, sizeof(struct reb_particle)*rim->encounterN);
-        rim->encounterRhill = realloc(rim->encounterRhill, sizeof(double)*rim->encounterN);
+        rim->encounter_dcrit = realloc(rim->encounter_dcrit, sizeof(double)*rim->encounterN);
     }
 
     // Copy particles to temporary particle array.
@@ -85,7 +85,7 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
             rim->encounterParticles[r->N].ap = r->particles[i].ap;
             rim->encounterParticles[r->N].hash = r->particles[i].hash;
             rim->encounterParticles[r->N].lastcollision = r->particles[i].lastcollision;
-            rim->encounterRhill[r->N] = rim->rhill[i];
+            rim->encounter_dcrit[r->N] = rim->dcrit[i];
             r->N++;
             if ((int)i<rim->globalNactive){
                 // The case globalNactive==-1 is handled below
@@ -166,7 +166,7 @@ static void reb_mercurius_predict_encounters(struct reb_simulation* const r){
     struct reb_simulation_integrator_whfast* riw = &(r->ri_whfast);
     struct reb_particle* const p_hn = riw->p_jh;
     struct reb_particle* const p_ho = rim->p_hold;
-    const double* const rhill = rim->rhill;
+    const double* const dcrit = rim->dcrit;
     const int N = r->N;
     const int N_active = r->N_active==-1?r->N:r->N_active;
     const double dt = r->dt;
@@ -219,10 +219,7 @@ static void reb_mercurius_predict_encounters(struct reb_simulation* const r){
                 rmin = MIN(MAX(rmin2,0.),rmin);
             }
 
-
-            const double rchange = MAX(rhill[i],rhill[j]);
-            
-            if (sqrt(rmin)< 1.1*rchange){
+            if (sqrt(rmin)< 1.1*MAX(dcrit[i],dcrit[j])){
                 if (rim->encounterIndicies[i]==0){
                     rim->encounterIndicies[i] = i;
                     rim->encounterN++;
@@ -249,10 +246,10 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
     const int N = r->N;
    
     
-    if (rim->rhillallocatedN<N){
-        rim->rhillallocatedN = N;
-        rim->rhill              = realloc(rim->rhill, sizeof(double)*N);
-        rim->recalculate_rhill_this_timestep        = 1;
+    if (rim->dcrit_allocatedN<N){
+        rim->dcrit_allocatedN = N;
+        rim->dcrit              = realloc(rim->dcrit, sizeof(double)*N);
+        rim->recalculate_dcrit_this_timestep        = 1;
     }
     if (rim->allocatedN<N){
         // These arrays are only used within one timestep. 
@@ -277,13 +274,13 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
         reb_transformations_inertial_to_democraticheliocentric_posvel(particles, riw->p_jh, N);
     }
 
-    if (rim->recalculate_rhill_this_timestep){
-        rim->recalculate_rhill_this_timestep = 0;
+    if (rim->recalculate_dcrit_this_timestep){
+        rim->recalculate_dcrit_this_timestep = 0;
         if (rim->is_synchronized==0){
             reb_integrator_mercurius_synchronize(r);
-            reb_warning(r,"MERCURIUS: Recalculating rhill but pos/vel were not synchronized before.");
+            reb_warning(r,"MERCURIUS: Recalculating dcrit but pos/vel were not synchronized before.");
         }
-        rim->rhill[0] = 0; // Unsused
+        rim->dcrit[0] = 0; // Unsused
         for (int i=1;i<N;i++){
             const double dx  = riw->p_jh[i].x;
             const double dy  = riw->p_jh[i].y;
@@ -297,17 +294,17 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
             const double GM = r->G*(rim->m0+r->particles[i].m);
             const double a = GM*_r / (2.*GM - _r*v2);
             const double vc = sqrt(GM/fabs(a));
-            double rhill = 0;
+            double dcrit = 0;
             // Criteria 1: average velocity
-            rhill = MAX(rhill, vc*0.4*r->dt);
+            dcrit = MAX(dcrit, vc*0.4*r->dt);
             // Criteria 2: current velocity
-            rhill = MAX(rhill, sqrt(v2)*0.4*r->dt);
+            dcrit = MAX(dcrit, sqrt(v2)*0.4*r->dt);
             // Criteria 3: Hill radius
-            rhill = MAX(rhill, rim->hillfac*a*pow(r->particles[i].m/(3.*r->particles[0].m),1./3.));
+            dcrit = MAX(dcrit, rim->hillfac*a*pow(r->particles[i].m/(3.*r->particles[0].m),1./3.));
             // Criteria 4: physical radius
-            rhill = MAX(rhill, 2.*r->particles[i].r);
+            dcrit = MAX(dcrit, 2.*r->particles[i].r);
 
-            rim->rhill[i] = rhill;
+            rim->dcrit[i] = dcrit;
         }
     }
     
@@ -411,16 +408,16 @@ void reb_integrator_mercurius_reset(struct reb_simulation* r){
     r->ri_mercurius.encounterAllocatedN = 0;
     free(r->ri_mercurius.encounterParticles);
     r->ri_mercurius.encounterParticles = NULL;
-    free(r->ri_mercurius.encounterRhill);
-    r->ri_mercurius.encounterRhill = NULL;
+    free(r->ri_mercurius.encounter_dcrit);
+    r->ri_mercurius.encounter_dcrit = NULL;
 
     r->ri_mercurius.allocatedN = 0;
     free(r->ri_mercurius.p_hold);
     r->ri_mercurius.p_hold = NULL;
     free(r->ri_mercurius.encounterIndicies);
     r->ri_mercurius.encounterIndicies = NULL;
-    r->ri_mercurius.rhillallocatedN = 0;
-    free(r->ri_mercurius.rhill);
-    r->ri_mercurius.rhill = NULL;
+    r->ri_mercurius.dcrit_allocatedN = 0;
+    free(r->ri_mercurius.dcrit);
+    r->ri_mercurius.dcrit = NULL;
 }
 

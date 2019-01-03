@@ -410,7 +410,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
             switch (r->ri_mercurius.mode){
                 case 0: // WHFAST part
                 {
-                    const double* const rhill = r->ri_mercurius.rhill;
+                    const double* const dcrit = r->ri_mercurius.dcrit;
 #pragma omp parallel for schedule(guided)
                     for (int i=0; i<_N_real; i++){
                         particles[i].ax = 0; 
@@ -429,7 +429,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dy = particles[i].y - particles[j].y;
                             const double dz = particles[i].z - particles[j].z;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
-                            const double rchange = MAX(rhill[i],rhill[j]);
+                            const double rchange = MAX(dcrit[i],dcrit[j]);
                             const double L = _L(r,_r,rchange);
                             const double mj = particles[j].m;
                             const double prefact = -G*mj*L/(_r*_r*_r);
@@ -448,7 +448,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dy = particles[i].y - particles[j].y;
                             const double dz = particles[i].z - particles[j].z;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
-                            const double rchange = MAX(rhill[i],rhill[j]);
+                            const double rchange = MAX(dcrit[i],dcrit[j]);
                             const double L = _L(r,_r,rchange);
                             const double mj = particles[j].m;
                             const double prefact = -G*mj*L/(_r*_r*_r);
@@ -462,7 +462,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                 break;
                 case 1: // IAS15 part
                 {
-                    const double* const rhill = r->ri_mercurius.encounterRhill;
+                    const double* const dcrit = r->ri_mercurius.encounter_dcrit;
 #pragma omp parallel for schedule(guided)
                     for (int i=0; i<N; i++){
                         particles[i].ax = 0; 
@@ -490,7 +490,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dz = z - particles[j].z;
                             const double mj = particles[j].m;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
-                            const double rchange = MAX(rhill[i],rhill[j]);
+                            const double rchange = MAX(dcrit[i],dcrit[j]);
                             const double L = _L(r,_r,rchange);
                             double prefact = -G*mj*(1.-L)/(_r*_r*_r);
                             particles[i].ax    += prefact*dx;
@@ -512,7 +512,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                             const double dz = z - particles[j].z;
                             const double mj = particles[j].m;
                             const double _r = sqrt(dx*dx + dy*dy + dz*dz + softening2);
-                            const double rchange = MAX(rhill[i],rhill[j]);
+                            const double rchange = MAX(dcrit[i],dcrit[j]);
                             const double L = _L(r,_r,rchange);
                             double prefact = -G*mj*(1.-L)/(_r*_r*_r);
                             particles[i].ax    += prefact*dx;

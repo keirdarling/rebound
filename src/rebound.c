@@ -362,10 +362,10 @@ void reb_reset_temporary_pointers(struct reb_simulation* const r){
     r->ri_hermes.a_i = NULL;
     r->ri_hermes.a_f = NULL;
     // ********** MERCURIUS
-    r->ri_mercurius.rhillallocatedN = 0;
+    r->ri_mercurius.dcrit_allocatedN = 0;
     r->ri_mercurius.allocatedN = 0;
-    r->ri_mercurius.rhill = NULL;
-    r->ri_mercurius.encounterRhill = NULL;
+    r->ri_mercurius.dcrit = NULL;
+    r->ri_mercurius.encounter_dcrit = NULL;
     r->ri_mercurius.encounterIndicies = NULL;
     r->ri_mercurius.encounterAllocatedN = 0;
     r->ri_mercurius.encounterParticles = NULL;
@@ -544,7 +544,7 @@ void reb_init_simulation(struct reb_simulation* r){
     r->ri_mercurius.mode = 0;
     r->ri_mercurius.safe_mode = 1;
     r->ri_mercurius.recalculate_coordinates_this_timestep = 0;
-    r->ri_mercurius.recalculate_rhill_this_timestep = 0;
+    r->ri_mercurius.recalculate_dcrit_this_timestep = 0;
     r->ri_mercurius.is_synchronized = 1;
     r->ri_mercurius.encounterN = 0;
     r->ri_mercurius.m0 = 0;

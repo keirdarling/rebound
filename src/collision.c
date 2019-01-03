@@ -286,7 +286,7 @@ void reb_collision_search(struct reb_simulation* const r){
                     r->collisions[collisions_N].p2 = j;
                     r->collisions[collisions_N].gb = gborig;
                     collisions_N++;
-                    r->ri_mercurius.recalculate_rhill_this_timestep = 1;
+                    r->ri_mercurius.recalculate_dcrit_this_timestep = 1;
                 }
             }
 		}

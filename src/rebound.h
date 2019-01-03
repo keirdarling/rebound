@@ -216,7 +216,7 @@ struct reb_simulation_integrator_mercurius {
      * also need to set this flag to 1 before every timestep.
      * Default is 0.
      */ 
-    unsigned int recalculate_rhill_this_timestep;
+    unsigned int recalculate_dcrit_this_timestep;
 
     /**
      * @brief If this flag is set (the default), the integrator will 
@@ -242,11 +242,11 @@ struct reb_simulation_integrator_mercurius {
     unsigned int globalN;       
     int globalNactive;
     unsigned int allocatedN;
-    unsigned int rhillallocatedN;
+    unsigned int dcrit_allocatedN;
     unsigned int encounterAllocatedN;
     double m0;
-    double* rhill;
-    double* encounterRhill;
+    double* dcrit;
+    double* encounter_dcrit;
     unsigned int* encounterIndicies;
     struct reb_particle* encounterParticles;
     struct reb_particle* REBOUND_RESTRICT p_hold;
@@ -615,7 +615,7 @@ enum REB_BINARY_FIELD_TYPE {
     REB_BINARY_FIELD_TYPE_MERCURIUS_SAFEMODE = 119,
     REB_BINARY_FIELD_TYPE_MERCURIUS_ISSYNCHRON = 120,
     REB_BINARY_FIELD_TYPE_MERCURIUS_M0 = 121,
-    REB_BINARY_FIELD_TYPE_MERCURIUS_RHILL = 122,
+    REB_BINARY_FIELD_TYPE_MERCURIUS_DCRIT = 122,
     REB_BINARY_FIELD_TYPE_MERCURIUS_KEEPUNSYNC = 124,
     REB_BINARY_FIELD_TYPE_SAVERSION = 125,
     REB_BINARY_FIELD_TYPE_WALLTIME = 126,

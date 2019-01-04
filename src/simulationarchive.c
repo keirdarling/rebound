@@ -173,7 +173,6 @@ void reb_create_simulation_from_simulationarchive_with_messages(struct reb_simul
                         // Assume we are not synchronized
                         r->ri_mercurius.is_synchronized=0.;
                         // Recalculate total mass
-                        r->ri_mercurius.m0 = r->particles[0].m;
                         double msum = r->particles[0].m;
                         for (int i=1;i<r->N;i++){
                             r->ri_whfast.p_jh[i].m = r->particles[i].m;

@@ -255,7 +255,6 @@ int reb_input_field(struct reb_simulation* r, FILE* inf, enum reb_input_binary_m
         CASE(MERCURIUS_HILLFAC,  &r->ri_mercurius.hillfac);
         CASE(MERCURIUS_SAFEMODE, &r->ri_mercurius.safe_mode);
         CASE(MERCURIUS_ISSYNCHRON, &r->ri_mercurius.is_synchronized);
-        CASE(MERCURIUS_M0,       &r->ri_mercurius.m0);
         CASE(MERCURIUS_KEEPUNSYNC, &r->ri_mercurius.keep_unsynchronized);
         case REB_BINARY_FIELD_TYPE_PARTICLES:
             if(r->particles){

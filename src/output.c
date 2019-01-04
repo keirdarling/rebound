@@ -344,7 +344,6 @@ void reb_output_binary_to_stream(struct reb_simulation* r, char** bufp, size_t* 
     WRITE_FIELD(MERCURIUS_HILLFAC,  &r->ri_mercurius.hillfac,           sizeof(double));
     WRITE_FIELD(MERCURIUS_SAFEMODE, &r->ri_mercurius.safe_mode,         sizeof(unsigned int));
     WRITE_FIELD(MERCURIUS_ISSYNCHRON, &r->ri_mercurius.is_synchronized, sizeof(unsigned int));
-    WRITE_FIELD(MERCURIUS_M0,       &r->ri_mercurius.m0,                sizeof(double));
     WRITE_FIELD(MERCURIUS_DCRIT,    r->ri_mercurius.dcrit,             sizeof(double)*r->ri_mercurius.dcrit_allocatedN);
     WRITE_FIELD(MERCURIUS_KEEPUNSYNC, &r->ri_mercurius.keep_unsynchronized,  sizeof(unsigned int));
     int functionpointersused = 0;

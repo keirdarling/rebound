@@ -176,8 +176,6 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     riw->p_jh[0].vx = rim->p_hold[0].vx;
     riw->p_jh[0].vy = rim->p_hold[0].vy;
     riw->p_jh[0].vz = rim->p_hold[0].vz;
-    // Update mass of central object
-    rim->m0 = r->particles[0].m;
 
     // Swap pointers
     {
@@ -305,7 +303,6 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
             reb_integrator_mercurius_synchronize(r);
             reb_warning(r,"MERCURIUS: Recalculating heliocentric coordinates but pos/vel were not synchronized before.");
         }
-        rim->m0 = r->particles[0].m;
         reb_transformations_inertial_to_democraticheliocentric_posvel(particles, riw->p_jh, N);
     }
 
@@ -316,6 +313,7 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
             reb_warning(r,"MERCURIUS: Recalculating dcrit but pos/vel were not synchronized before.");
         }
         rim->dcrit[0] = 2.*r->particles[0].r; // central object only uses physical radius
+        const double m0 = r->particles[0].m;
         for (int i=1;i<N;i++){
             const double dx  = riw->p_jh[i].x;
             const double dy  = riw->p_jh[i].y;
@@ -326,7 +324,7 @@ void reb_integrator_mercurius_part1(struct reb_simulation* r){
             const double _r = sqrt(dx*dx + dy*dy + dz*dz);
             const double v2 = dvx*dvx + dvy*dvy + dvz*dvz;
 
-            const double GM = r->G*(rim->m0+r->particles[i].m);
+            const double GM = r->G*(m0+r->particles[i].m);
             const double a = GM*_r / (2.*GM - _r*v2);
             const double vc = sqrt(GM/fabs(a));
             double dcrit = 0;
@@ -430,7 +428,6 @@ void reb_integrator_mercurius_reset(struct reb_simulation* r){
     r->ri_mercurius.encounterN = 0;
     r->ri_mercurius.globalN = 0;
     r->ri_mercurius.globalNactive = 0;
-    r->ri_mercurius.m0 = 0;
     r->ri_mercurius.hillfac = 3;
     r->ri_mercurius.keep_unsynchronized = 0;
     r->ri_mercurius.recalculate_coordinates_this_timestep = 0;

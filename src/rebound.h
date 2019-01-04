@@ -245,7 +245,6 @@ struct reb_simulation_integrator_mercurius {
     unsigned int allocatedN;
     unsigned int dcrit_allocatedN;
     unsigned int encounterAllocatedN;
-    double m0;
     double* dcrit;
     double* encounter_dcrit;
     unsigned int* encounterIndicies;
@@ -615,7 +614,6 @@ enum REB_BINARY_FIELD_TYPE {
     REB_BINARY_FIELD_TYPE_MERCURIUS_HILLFAC = 118,
     REB_BINARY_FIELD_TYPE_MERCURIUS_SAFEMODE = 119,
     REB_BINARY_FIELD_TYPE_MERCURIUS_ISSYNCHRON = 120,
-    REB_BINARY_FIELD_TYPE_MERCURIUS_M0 = 121,
     REB_BINARY_FIELD_TYPE_MERCURIUS_DCRIT = 122,
     REB_BINARY_FIELD_TYPE_MERCURIUS_KEEPUNSYNC = 124,
     REB_BINARY_FIELD_TYPE_SAVERSION = 125,

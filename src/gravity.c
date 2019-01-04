@@ -405,7 +405,6 @@ void reb_calculate_acceleration(struct reb_simulation* r){
 		break;
         case REB_GRAVITY_MERCURIUS:
         {
-            const double m0 = r->ri_mercurius.m0;
             double (*_L) (const struct reb_simulation* const r, double d, double dcrit) = r->ri_mercurius.L;
             switch (r->ri_mercurius.mode){
                 case 0: // WHFAST part
@@ -462,6 +461,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                 break;
                 case 1: // IAS15 part
                 {
+                    const double m0 = r->particles[0].m;
                     const double* const dcrit = r->ri_mercurius.encounter_dcrit;
 #pragma omp parallel for schedule(guided)
                     for (int i=0; i<N; i++){

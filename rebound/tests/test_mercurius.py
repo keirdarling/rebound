@@ -104,12 +104,13 @@ class TestMercurius(unittest.TestCase):
     def test_collision_with_star(self):
         sim = rebound.Simulation()
         sim.add(m=1.,r=0.00465)
-        sim.add(m=1e-5,r=1.6e-4,a=0.5,e=0.1) 
+        #sim.add(m=1e-5,r=1.6e-4,a=0.5,e=0.1) 
         sim.add(m=1e-4,r=1.4e-3,x=1.,vx=-0.4) # falling onto the star
+        sim.move_to_com()
         N0 = sim.N
 
         sim.integrator = "mercurius"
-        sim.dt = 0.0001
+        sim.dt = 0.01
         sim.track_energy_offset = 1;
         sim.collision_resolve_keep_sorted = 1
         sim.collision = "direct"
@@ -117,8 +118,11 @@ class TestMercurius(unittest.TestCase):
         
         E0 = sim.calculate_energy()
         print([p.m for p in sim.particles])
+        print(sim.calculate_com())
         sim.integrate(1)
         print([p.m for p in sim.particles])
+        print(sim.calculate_com())
+        print(sim.energy_offset/E0)
         self.assertEqual(N0-1,sim.N)
         dE = abs((sim.calculate_energy() - E0)/E0)
         self.assertLess(dE,2e-9)

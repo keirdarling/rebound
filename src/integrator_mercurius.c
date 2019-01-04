@@ -144,6 +144,24 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
         reb_integrator_ias15_part2(r);
 
         reb_collision_search(r);
+        for (int i=rim->globalN-1;i>=1;i--){
+            riw->p_jh[i].x -= r->particles[0].x;
+            riw->p_jh[i].y -= r->particles[0].y;
+            riw->p_jh[i].z -= r->particles[0].z;
+            riw->p_jh[i].vx -= r->particles[0].vx;
+            riw->p_jh[i].vy -= r->particles[0].vy;
+            riw->p_jh[i].vz -= r->particles[0].vz;
+        }
+        for (int i=r->N-1;i>=0;i--){
+            r->particles[i].x -= r->particles[0].x;
+            r->particles[i].y -= r->particles[0].y;
+            r->particles[i].z -= r->particles[0].z;
+            r->particles[i].vx -= r->particles[0].vx;
+            r->particles[i].vy -= r->particles[0].vy;
+            r->particles[i].vz -= r->particles[0].vz;
+        }
+        reb_integrator_ias15_reset(r);
+
         if (r->t+r->dt >  t_needed){
             r->dt = t_needed-r->t;
         }

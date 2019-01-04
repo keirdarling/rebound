@@ -471,7 +471,9 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                     }
                     // Summing over all particle pairs
 #pragma omp parallel for schedule(guided)
-                    for (int i=0; i<_N_real; i++){
+                    for (int i=1; i<_N_real; i++){
+                        // We're in a heliocentric coordinate system.
+                        // The star feels no acceleration
 #ifndef OPENMP
                         if (reb_sigint) return;
 #endif // OPENMP
@@ -483,7 +485,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                         particles[i].ax    += prefact*x;
                         particles[i].ay    += prefact*y;
                         particles[i].az    += prefact*z;
-                        for (int j=0; j<_N_active; j++){
+                        for (int j=1; j<_N_active; j++){
                             if (i==j) continue;
                             const double dx = x - particles[j].x;
                             const double dy = y - particles[j].y;
@@ -499,7 +501,7 @@ void reb_calculate_acceleration(struct reb_simulation* r){
                         }
                     }
                     if (_testparticle_type){
-                    for (int i=0; i<_N_active; i++){
+                    for (int i=1; i<_N_active; i++){
 #ifndef OPENMP
                         if (reb_sigint) return;
 #endif // OPENMP

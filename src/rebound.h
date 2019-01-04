@@ -210,9 +210,10 @@ struct reb_simulation_integrator_mercurius {
     unsigned int recalculate_coordinates_this_timestep;
 
     /** 
-     * @brief Setting this flag to one will recalculate Hill radii at the beginning of the next timestep. 
+     * @brief Setting this flag to one will recalculate the critical switchover 
+     * distances dcrit at the the beginning of the next timestep. 
      * @details After one timestep, the flag gets set back to 0. 
-     * If you want to recalculate hill radii at every every timestep, you 
+     * If you want to recalculate dcrit at every every timestep, you 
      * also need to set this flag to 1 before every timestep.
      * Default is 0.
      */ 
@@ -224,7 +225,7 @@ struct reb_simulation_integrator_mercurius {
      * every timestep, to avoid problems with outputs or particle modifications
      * between timesteps. 
      * @details Setting it to 0 will result in a speedup, but care
-     * must be taken to synchronize and recalculate jacobi coordinates when needed.
+     * must be taken to synchronize and recalculate coordinates when needed.
      */
     unsigned int safe_mode;
     

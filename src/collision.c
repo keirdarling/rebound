@@ -552,6 +552,12 @@ int reb_collision_resolve_merge(struct reb_simulation* const r, struct reb_colli
             double vx = pi->vx;
             double vy = pi->vy;
             double vz = pi->vz;
+            // Calculate energy difference in inertial frame
+            if (r->integrator == REB_INTEGRATOR_MERCURIUS && r->ri_mercurius.mode==1){
+                vx += r->ri_mercurius.p_hold[0].vx;
+                vy += r->ri_mercurius.p_hold[0].vy;
+                vz += r->ri_mercurius.p_hold[0].vz;
+            }
 
             Ei += 0.5*pi->m*(vx*vx + vy*vy + vz*vz);
         }
@@ -559,6 +565,11 @@ int reb_collision_resolve_merge(struct reb_simulation* const r, struct reb_colli
             double vx = pj->vx;
             double vy = pj->vy;
             double vz = pj->vz;
+            if (r->integrator == REB_INTEGRATOR_MERCURIUS && r->ri_mercurius.mode==1){
+                vx += r->ri_mercurius.p_hold[0].vx;
+                vy += r->ri_mercurius.p_hold[0].vy;
+                vz += r->ri_mercurius.p_hold[0].vz;
+            }
 
             Ei += 0.5*pj->m*(vx*vx + vy*vy + vz*vz);
         }
@@ -592,6 +603,12 @@ int reb_collision_resolve_merge(struct reb_simulation* const r, struct reb_colli
             double vx = pi->vx;
             double vy = pi->vy;
             double vz = pi->vz;
+            printf("%f %f %f\n",vx,vy,vz);
+            if (r->integrator == REB_INTEGRATOR_MERCURIUS && r->ri_mercurius.mode==1){
+                vx += r->ri_mercurius.p_hold[0].vx;
+                vy += r->ri_mercurius.p_hold[0].vy;
+                vz += r->ri_mercurius.p_hold[0].vz;
+            }
 
             Ef += 0.5*pi->m*(vx*vx + vy*vy + vz*vz);
         }

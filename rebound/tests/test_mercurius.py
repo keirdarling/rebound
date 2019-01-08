@@ -123,6 +123,7 @@ class TestMercurius(unittest.TestCase):
         print([p.m for p in sim.particles])
         print(sim.calculate_com())
         print(sim.energy_offset/E0)
+        print(sim.particles[0])
         self.assertEqual(N0-1,sim.N)
         dE = abs((sim.calculate_energy() - E0)/E0)
         self.assertLess(dE,2e-9)

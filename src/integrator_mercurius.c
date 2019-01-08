@@ -110,12 +110,18 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
             }
         }
     }
+
+    struct reb_particle star = r->particles[0];
+    star.x = 0.;    // democratic heliocentric coordinates of the star
+    star.y = 0.;
+    star.z = 0.;
+    star.vx -= rim->p_hold[0].vx;
+    star.vy -= rim->p_hold[0].vy;
+    star.vz -= rim->p_hold[0].vz;
+
     // manual set star particle
-    rim->encounterParticles[0].m = r->particles[0].m;
-    rim->encounterParticles[0].x = 0;
-    rim->encounterParticles[0].y = 0;
-    rim->encounterParticles[0].z = 0;
-    rim->encounterParticles[0].vx = 0;
+    rim->encounterParticles[0] = star;
+    rim->encounterParticles[0].vx = 0; // will not evolve in IAS15
     rim->encounterParticles[0].vy = 0;
     rim->encounterParticles[0].vz = 0;
     if (rim->globalNactive==-1){
@@ -142,23 +148,26 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     while(r->t < t_needed && fabs(r->dt/old_dt)>1e-14 ){
         reb_update_acceleration(r);
         reb_integrator_ias15_part2(r);
-
+        {
+            r->particles[0].vx = star.vx;
+            r->particles[0].vy = star.vy;
+            r->particles[0].vz = star.vz;
+        }
         reb_collision_search(r);
         for (int i=rim->globalN-1;i>=1;i--){
             riw->p_jh[i].x -= r->particles[0].x;
             riw->p_jh[i].y -= r->particles[0].y;
             riw->p_jh[i].z -= r->particles[0].z;
-            riw->p_jh[i].vx -= r->particles[0].vx;
-            riw->p_jh[i].vy -= r->particles[0].vy;
-            riw->p_jh[i].vz -= r->particles[0].vz;
         }
         for (int i=r->N-1;i>=0;i--){
             r->particles[i].x -= r->particles[0].x;
             r->particles[i].y -= r->particles[0].y;
             r->particles[i].z -= r->particles[0].z;
-            r->particles[i].vx -= r->particles[0].vx;
-            r->particles[i].vy -= r->particles[0].vy;
-            r->particles[i].vz -= r->particles[0].vz;
+        }
+        {
+            r->particles[0].vx = 0;
+            r->particles[0].vy = 0;
+            r->particles[0].vz = 0;
         }
         reb_integrator_ias15_reset(r);
 
@@ -173,20 +182,20 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     int k = 0;
     double totalm_new = 0;
     for (unsigned int i=0; i<rim->globalN; i++){
-        totalm_new += r->particles[k].m;
         if(rim->encounterIndicies[i]>0){ // always include star in case of collisions
             riw->p_jh[i] = r->particles[k];
             // In case properties changed in a collision
             rim->encounterParticles[i].r = r->particles[k].r;
+            rim->encounterParticles[i].m = r->particles[k].m;
             rim->encounterParticles[i].ap = r->particles[k].ap;
             rim->encounterParticles[i].hash = r->particles[k].hash;
             rim->encounterParticles[i].lastcollision = r->particles[k].lastcollision;
-            // Mass update is more complicated as it is in part done by the transformations.
-            rim->encounterParticles[i].m = r->particles[k].m;
             k++;
         }
+        totalm_new += rim->encounterParticles[i].m;
     }
     // Update total mass (0th particle is com)
+    // Assume no change in com
     riw->p_jh[0].m = totalm_new;
     riw->p_jh[0].x = rim->p_hold[0].x;
     riw->p_jh[0].y = rim->p_hold[0].y;
@@ -388,8 +397,7 @@ void reb_integrator_mercurius_part2(struct reb_simulation* const r){
         reb_whfast_interaction_step(r,r->dt);
     }
     reb_whfast_jump_step(r,r->dt/2.);
-   
-    reb_whfast_com_step(r,r->dt);
+    reb_whfast_com_step(r,r->dt/2.);  // Split into two parts in case of collision
     
     memcpy(rim->p_hold,riw->p_jh,N*sizeof(struct reb_particle));
     reb_whfast_kepler_step(r,r->dt);
@@ -398,6 +406,7 @@ void reb_integrator_mercurius_part2(struct reb_simulation* const r){
    
     reb_mercurius_encounterstep(r,r->dt);
     
+    reb_whfast_com_step(r,r->dt/2.);
     reb_whfast_jump_step(r,r->dt/2.);
         
     reb_transformations_democraticheliocentric_to_inertial_posvel(particles, riw->p_jh, N);

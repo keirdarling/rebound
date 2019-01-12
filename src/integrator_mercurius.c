@@ -112,7 +112,7 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     }
 
     struct reb_particle star = r->particles[0];
-    star.x = 0.;    // democratic heliocentric coordinates of the star
+    star.x = 0.;    // democratic heliocentric coordinates of the star (not com)
     star.y = 0.;
     star.z = 0.;
     star.vx -= rim->p_hold[0].vx;
@@ -148,28 +148,38 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     while(r->t < t_needed && fabs(r->dt/old_dt)>1e-14 ){
         reb_update_acceleration(r);
         reb_integrator_ias15_part2(r);
+        // Set star's velocity in com frame.
+        // Assume com does not change during step.
         {
             r->particles[0].vx = star.vx;
             r->particles[0].vy = star.vy;
             r->particles[0].vz = star.vz;
         }
         reb_collision_search(r);
-        for (int i=rim->globalN-1;i>=1;i--){
-            riw->p_jh[i].x -= r->particles[0].x;
-            riw->p_jh[i].y -= r->particles[0].y;
-            riw->p_jh[i].z -= r->particles[0].z;
-        }
-        for (int i=r->N-1;i>=0;i--){
-            r->particles[i].x -= r->particles[0].x;
-            r->particles[i].y -= r->particles[0].y;
-            r->particles[i].z -= r->particles[0].z;
+        if (r->particles[0].x!=0. || r->particles[0].y!=0. || r->particles[0].z!=0.){
+            // Update heliocentric positions of all particles if star moved.
+            for (int i=rim->globalN-1;i>=1;i--){
+                riw->p_jh[i].x -= r->particles[0].x;
+                riw->p_jh[i].y -= r->particles[0].y;
+                riw->p_jh[i].z -= r->particles[0].z;
+            }
+            // Update heliocentric positions of close encounter prticl;es
+            // if star moved.
+            for (int i=r->N-1;i>=0;i--){
+                r->particles[i].x -= r->particles[0].x;
+                r->particles[i].y -= r->particles[0].y;
+                r->particles[i].z -= r->particles[0].z;
+            }
         }
         {
+            // Set star velocity back to 0 because:
+            // 1. We're in the heliocentric frame and star should not move during step.
+            // 2. We assume com does not change. We've already updated the other particles.
+            //    The star's velocity will be calculated using the com.
             r->particles[0].vx = 0;
             r->particles[0].vy = 0;
             r->particles[0].vz = 0;
         }
-        reb_integrator_ias15_reset(r);
 
         if (r->t+r->dt >  t_needed){
             r->dt = t_needed-r->t;

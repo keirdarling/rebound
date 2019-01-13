@@ -260,7 +260,7 @@ int reb_remove(struct reb_simulation* const r, int index, int keepSorted){
             rim->globalNactive--;
         }
 		for(unsigned int j=global_index; j<rim->globalN; j++){
-			rim->encounterParticles[j] = rim->encounterParticles[j+1];  // These are the global particles
+			rim->particles_buffer[j] = rim->particles_buffer[j+1];  // These are the global particles
 			riw->p_jh[j] = riw->p_jh[j+1];
 			rim->p_hold[j] = rim->p_hold[j+1];
 			rim->encounterIndicies[j] = rim->encounterIndicies[j+1];

@@ -85,9 +85,9 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     rim->globalNactive = r->N_active;
 
     // Allocate memory for the integration. Only resize if needed.
-    if (rim->encounterAllocatedN<rim->encounterN){
-        rim->encounterAllocatedN = rim->encounterN;
-        rim->encounterParticles = realloc(rim->encounterParticles, sizeof(struct reb_particle)*rim->encounterN);
+    if (rim->bufferAllocatedN<rim->encounterN){
+        rim->bufferAllocatedN = rim->encounterN;
+        rim->particles_buffer = realloc(rim->particles_buffer, sizeof(struct reb_particle)*rim->encounterN);
         rim->encounter_dcrit = realloc(rim->encounter_dcrit, sizeof(double)*rim->encounterN);
     }
 
@@ -97,11 +97,11 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     r->N = 0;
     for (unsigned int i=0; i<rim->globalN; i++){
         if(rim->encounterIndicies[i]>0){ // always include star in case of collisions
-            rim->encounterParticles[r->N] = rim->p_hold[i];
-            rim->encounterParticles[r->N].r = r->particles[i].r;
-            rim->encounterParticles[r->N].ap = r->particles[i].ap;
-            rim->encounterParticles[r->N].hash = r->particles[i].hash;
-            rim->encounterParticles[r->N].lastcollision = r->particles[i].lastcollision;
+            rim->particles_buffer[r->N] = rim->p_hold[i];
+            rim->particles_buffer[r->N].r = r->particles[i].r;
+            rim->particles_buffer[r->N].ap = r->particles[i].ap;
+            rim->particles_buffer[r->N].hash = r->particles[i].hash;
+            rim->particles_buffer[r->N].lastcollision = r->particles[i].lastcollision;
             rim->encounter_dcrit[r->N] = rim->dcrit[i];
             r->N++;
             if ((int)i<rim->globalNactive){
@@ -111,19 +111,15 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
         }
     }
 
-    struct reb_particle star = r->particles[0];
-    star.x = 0.;    // democratic heliocentric coordinates of the star (not com)
-    star.y = 0.;
-    star.z = 0.;
-    star.vx -= rim->p_hold[0].vx;
-    star.vy -= rim->p_hold[0].vy;
-    star.vz -= rim->p_hold[0].vz;
-
-    // manual set star particle
-    rim->encounterParticles[0] = star;
-    rim->encounterParticles[0].vx = 0; // will not evolve in IAS15
-    rim->encounterParticles[0].vy = 0;
-    rim->encounterParticles[0].vz = 0;
+    // manual set star particle in democratic heliocentric frame
+    // used for collision detection
+    rim->particles_buffer[0] = r->particles[0];
+    rim->particles_buffer[0].x = 0; 
+    rim->particles_buffer[0].y = 0;
+    rim->particles_buffer[0].z = 0;
+    rim->particles_buffer[0].vx = 0; // set to 0 so that it will not evolve in IAS15
+    rim->particles_buffer[0].vy = 0;
+    rim->particles_buffer[0].vz = 0;
     if (rim->globalNactive==-1){
         r->N_active=-1;
     }
@@ -131,8 +127,8 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     // Swap pointers
     {
         struct reb_particle* temp = r->particles;
-        r->particles = rim->encounterParticles;
-        rim->encounterParticles = temp;
+        r->particles = rim->particles_buffer;
+        rim->particles_buffer = temp;
     }
     rim->mode = 1;
     
@@ -151,9 +147,9 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
         // Set star's velocity in com frame.
         // Assume com does not change during step.
         {
-            r->particles[0].vx = star.vx;
-            r->particles[0].vy = star.vy;
-            r->particles[0].vz = star.vz;
+            r->particles[0].vx = rim->particles_buffer[0].vx-rim->p_hold[0].vx;
+            r->particles[0].vy = rim->particles_buffer[0].vy-rim->p_hold[0].vy;
+            r->particles[0].vz = rim->particles_buffer[0].vz-rim->p_hold[0].vz;
         }
         reb_collision_search(r);
         if (r->particles[0].x!=0. || r->particles[0].y!=0. || r->particles[0].z!=0.){
@@ -163,7 +159,7 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
                 riw->p_jh[i].y -= r->particles[0].y;
                 riw->p_jh[i].z -= r->particles[0].z;
             }
-            // Update heliocentric positions of close encounter prticl;es
+            // Update heliocentric positions of close encounter praticles
             // if star moved.
             for (int i=r->N-1;i>=0;i--){
                 r->particles[i].x -= r->particles[0].x;
@@ -195,14 +191,14 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
         if(rim->encounterIndicies[i]>0){ // always include star in case of collisions
             riw->p_jh[i] = r->particles[k];
             // In case properties changed in a collision
-            rim->encounterParticles[i].r = r->particles[k].r;
-            rim->encounterParticles[i].m = r->particles[k].m;
-            rim->encounterParticles[i].ap = r->particles[k].ap;
-            rim->encounterParticles[i].hash = r->particles[k].hash;
-            rim->encounterParticles[i].lastcollision = r->particles[k].lastcollision;
+            rim->particles_buffer[i].r = r->particles[k].r;
+            rim->particles_buffer[i].m = r->particles[k].m;
+            rim->particles_buffer[i].ap = r->particles[k].ap;
+            rim->particles_buffer[i].hash = r->particles[k].hash;
+            rim->particles_buffer[i].lastcollision = r->particles[k].lastcollision;
             k++;
         }
-        totalm_new += rim->encounterParticles[i].m;
+        totalm_new += rim->particles_buffer[i].m;
     }
     // Update total mass (0th particle is com)
     // Assume no change in com
@@ -217,8 +213,8 @@ static void reb_mercurius_encounterstep(struct reb_simulation* const r, const do
     // Swap pointers
     {
         struct reb_particle* temp = r->particles;
-        r->particles = rim->encounterParticles;
-        rim->encounterParticles = temp;
+        r->particles = rim->particles_buffer;
+        rim->particles_buffer = temp;
     }
     // Reset constant for global particles
     r->N = rim->globalN;
@@ -407,7 +403,7 @@ void reb_integrator_mercurius_part2(struct reb_simulation* const r){
         reb_whfast_interaction_step(r,r->dt);
     }
     reb_whfast_jump_step(r,r->dt/2.);
-    reb_whfast_com_step(r,r->dt/2.);  // Split into two parts in case of collision
+    reb_whfast_com_step(r,r->dt); 
     
     memcpy(rim->p_hold,riw->p_jh,N*sizeof(struct reb_particle));
     reb_whfast_kepler_step(r,r->dt);
@@ -416,7 +412,6 @@ void reb_integrator_mercurius_part2(struct reb_simulation* const r){
    
     reb_mercurius_encounterstep(r,r->dt);
     
-    reb_whfast_com_step(r,r->dt/2.);
     reb_whfast_jump_step(r,r->dt/2.);
         
     reb_transformations_democraticheliocentric_to_inertial_posvel(particles, riw->p_jh, N);
@@ -469,9 +464,9 @@ void reb_integrator_mercurius_reset(struct reb_simulation* r){
     r->ri_mercurius.keep_unsynchronized = 0;
     r->ri_mercurius.recalculate_coordinates_this_timestep = 0;
     // Arrays
-    r->ri_mercurius.encounterAllocatedN = 0;
-    free(r->ri_mercurius.encounterParticles);
-    r->ri_mercurius.encounterParticles = NULL;
+    r->ri_mercurius.bufferAllocatedN = 0;
+    free(r->ri_mercurius.particles_buffer);
+    r->ri_mercurius.particles_buffer = NULL;
     free(r->ri_mercurius.encounter_dcrit);
     r->ri_mercurius.encounter_dcrit = NULL;
 

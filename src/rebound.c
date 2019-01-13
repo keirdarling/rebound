@@ -367,8 +367,8 @@ void reb_reset_temporary_pointers(struct reb_simulation* const r){
     r->ri_mercurius.dcrit = NULL;
     r->ri_mercurius.encounter_dcrit = NULL;
     r->ri_mercurius.encounterIndicies = NULL;
-    r->ri_mercurius.encounterAllocatedN = 0;
-    r->ri_mercurius.encounterParticles = NULL;
+    r->ri_mercurius.bufferAllocatedN = 0;
+    r->ri_mercurius.particles_buffer = NULL;
     r->ri_mercurius.p_hold = NULL;
     r->ri_mercurius.keep_unsynchronized = 0;
 

@@ -244,11 +244,11 @@ struct reb_simulation_integrator_mercurius {
     int globalNactive;
     unsigned int allocatedN;
     unsigned int dcrit_allocatedN;
-    unsigned int encounterAllocatedN;
+    unsigned int bufferAllocatedN;
     double* dcrit;
     double* encounter_dcrit;
     unsigned int* encounterIndicies;
-    struct reb_particle* encounterParticles;
+    struct reb_particle* particles_buffer;
     struct reb_particle* REBOUND_RESTRICT p_hold;
 };
 

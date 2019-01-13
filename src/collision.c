@@ -603,7 +603,6 @@ int reb_collision_resolve_merge(struct reb_simulation* const r, struct reb_colli
             double vx = pi->vx;
             double vy = pi->vy;
             double vz = pi->vz;
-            printf("%f %f %f\n",vx,vy,vz);
             if (r->integrator == REB_INTEGRATOR_MERCURIUS && r->ri_mercurius.mode==1){
                 vx += r->ri_mercurius.p_hold[0].vx;
                 vy += r->ri_mercurius.p_hold[0].vy;
@@ -614,7 +613,6 @@ int reb_collision_resolve_merge(struct reb_simulation* const r, struct reb_colli
         }
         r->energy_offset += Ei - Ef;
     }
-    printf("remove %d  %d   mode %d\n",i,j,r->ri_mercurius.mode);
     
     // If hermes calculate energy offset in global - hasn't been removed from global yet
     if (r->ri_hermes.global){
